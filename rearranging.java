@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class rearranging {
@@ -22,31 +23,40 @@ public class rearranging {
         // non-numerical values
         List<String> tempI;// declare a variable to temporarily hold each list within inputs
         double tempDouble;// declare a variable to temporarily hold each value within a list in inputs
+        boolean rowValid;
+        boolean noNegatives;
         System.out.println(inputs.size());
-        boolean noExceptionOccured;
         int initialSize = inputs.size();
+        List<List<String>> inputsNumerical = new ArrayList<>();
         for (int i = 0; i < initialSize; i++) {// iterating through inputs
-            System.out.println("i = " + i);
+            rowValid = true;
             tempI = inputs.get(i);
-            noExceptionOccured = true;
-            while (noExceptionOccured) {
                 for (int j = 0; j < tempI.size(); j++) {// iterating through an individual list
                     try {
-                        tempDouble = Double.valueOf(tempI.get(j));// attempts to cast numerical value to type double
+                        tempDouble = Double.parseDouble(tempI.get(j));// attempts to cast numerical value to type double
                     } catch (Exception e) {// if value non-numerical
-                        inputs.remove(i);
-                        noExceptionOccured = false;
+                        rowValid = false;
                     }
                 }
-            }
+                noNegatives = true;
+                if (rowValid) {
+                    for (int k = 0; k < tempI.size(); k++){
+                        if (Double.parseDouble(tempI.get(k)) < 0){
+                            noNegatives = false;
+                        }
+                    }
+                    if (noNegatives){
+                        inputsNumerical.add(tempI);
+                    }
+                }
         }
-        System.out.println(inputs.size());
-        System.out.println(inputs);
+        System.out.println(inputsNumerical.size());
+        System.out.println(inputsNumerical);
 
-        double[][] inputsAsDoubles = new double[inputs.size()][inputs.get(0).size()];
+        double[][] inputsAsDoubles = new double[inputsNumerical.size()][inputsNumerical.get(0).size()];
         // allocates space in memory for the inputs, as a 2d array of type double
-        for (int i = 0; i < inputs.size(); i++) {// iterating through inputs
-            tempI = inputs.get(i);
+        for (int i = 0; i < inputsNumerical.size(); i++) {// iterating through inputs
+            tempI = inputsNumerical.get(i);
             for (int j = 0; j < tempI.size(); j++) {// iterating through an individual list
                 tempDouble = Double.valueOf(tempI.get(j));// attempts to cast numerical value to type double
                 inputsAsDoubles[i][j] = tempDouble;// assigns to index
@@ -58,14 +68,21 @@ public class rearranging {
         }
         return inputsAsDoubles;
     }
-    // finding non-numercials
-    // casting into double
-    // finding outliers
-    // standardising inputs
+    public double[][] eliminateOutliers (double[][] inputsWithOutliers){
+        // finding outliers
+        double[][] outliersEliminated = new double[inputsWithOutliers.length][inputsWithOutliers[0].length];
+        return outliersEliminated;
+    }
+    public double[][] standardiseInputs (double[][] unstandardisedInputs){
+        // standardising inputs
+        double[][] inputsStandardised = new double[unstandardisedInputs.length][unstandardisedInputs[0].length];
+        return inputsStandardised;
+    }
 
     public static void main(String[] args) throws FileNotFoundException {
-        rearranging wd = new rearranging();
-        // wd.deleteDates();
-        System.out.println(wd.castingToDouble(wd.deleteDates()));
+        rearranging trial = new rearranging();
+        List<List<String>> deleteddates = trial.deleteDates();
+        double[][] cast = trial.castingToDouble(deleteddates);
+        System.out.println(cast);
     }
 }
