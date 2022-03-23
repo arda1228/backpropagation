@@ -2,6 +2,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 public class rearranging {
+
     public List<List<String>> deleteDates() throws FileNotFoundException {
         readingfromexternal test = new readingfromexternal();
         List<List<String>> originals = test.getValues();
@@ -9,6 +10,7 @@ public class rearranging {
         // System.out.println("originals: " + originals);
         for (List list : originals) {
             list.remove(0);
+
         }
         System.out.println("originals: " + originals);
         return originals;
