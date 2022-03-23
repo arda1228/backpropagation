@@ -5,19 +5,19 @@ class backpropexample {
     // standardising inputs
     // read from text file
     // make functions to do calculations
-    public double sigmoidActivation(double input) {
+    public double sigmoidActivation(double input) {//enter value, returns the sigmoid transfer for it
         return 1 / (1 + Math.exp(-input));
     }
 
-    public double sigmoidActivationDiff(double input) {
+    public double sigmoidActivationDiff(double input) {//enter sigmoid-activated value, returns the differential
         return input * (1 - input);
     }
 
-    public double tanhActivation(double input) {
+    public double tanhActivation(double input) {//enter value, returns the tanh transfer for it
         return (Math.exp(input) - Math.exp(-input)) / (Math.exp(input) + Math.exp(-input));
     }
 
-    public double tanhActivationDiff(double input) {
+    public double tanhActivationDiff(double input) {//enter tanh-activated value, returns the differential
         return 1 - (input * input);
     }
 
@@ -142,6 +142,7 @@ class backpropexample {
             epochCounter++;
         }
         meanSquaredError = totalSquaredError/epochs;
+        System.out.println(meanSquaredError);
     }
 
     // next
