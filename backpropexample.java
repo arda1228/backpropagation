@@ -38,9 +38,12 @@ class backpropexample {
         // inputs = this.StandardiseInputs(inputs);
         Random rand = new Random(67); // instance of random class
         int epochCounter = 0;
+        double totalSquaredError = 0;
+        double meanSquaredError;
         double prevWeight;
         double p = 0.1;
         double alpha = 0.9;
+        double desiredOutput = inputs[inputs.length-1];
         int NoOfInputs = inputs.length - 1;
         double[][] inputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes];
         double[][] changeInInputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes];
@@ -97,6 +100,8 @@ class backpropexample {
                     outputsActivation[i] = this.tanhActivation(outputLayerWeightedSums[i]);
                 }
                 System.out.println("output: " + outputsActivation[i]);
+                totalSquaredError +=  Math.pow(desiredOutput - outputsActivation[i], 2);
+                //change to destandardised output
             }
             // backwards pass
             for (int i = 0; i < outputsActivation.length; i++) {
@@ -136,7 +141,7 @@ class backpropexample {
             }
             epochCounter++;
         }
-
+        meanSquaredError = totalSquaredError/epochs;
     }
 
     // next
@@ -149,7 +154,8 @@ class backpropexample {
         double[] testinputs = { 1, 9, 5, 7, 8, 0, 2, 1 };
         backpropexample test = new backpropexample();
         test.backProp(testinputs, 4, 13, true, true);
-        //test.backProp(input, number of nodes in hidden layer, number of epochs, sigmoid(true) or tanh(false), use of momentum(true) or not(false), use of bold driver(true) or not(false))
+        // test.backProp(input, number of nodes in hidden layer, number of epochs,
+        // sigmoid(true) or tanh(false), use of momentum(true) or not(false)
         readingfromexternal wd = new readingfromexternal();
         System.out.println("records: " + wd.getValues());
     }
