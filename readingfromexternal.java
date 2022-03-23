@@ -27,6 +27,7 @@ class readingfromexternal {
         }
         return records;
     }
+    
 
     public static void main(String[] args) throws FileNotFoundException {
         readingfromexternal test = new readingfromexternal();

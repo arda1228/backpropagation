@@ -149,6 +149,7 @@ class backpropexample {
         double[] testinputs = { 1, 9, 5, 7, 8, 0, 2, 1 };
         backpropexample test = new backpropexample();
         test.backProp(testinputs, 4, 13, true, true);
+        //test.backProp(input, number of nodes in hidden layer, number of epochs, sigmoid(true) or tanh(false), use of momentum(true) or not(false), use of bold driver(true) or not(false))
         readingfromexternal wd = new readingfromexternal();
         System.out.println("records: " + wd.getValues());
     }
