@@ -71,27 +71,40 @@ public class rearranging {
 
     public double[][] eliminateOutliers(double[][] inputsWithOutliers) {
         // finding outliers
-        double[] averages = new double[inputsWithOutliers[0].length];
+        double[] totals = new double[inputsWithOutliers[0].length];
+        double[] means = new double[inputsWithOutliers[0].length];
+        double[] standardDeviations = new double[inputsWithOutliers[0].length];
+        double[] totalDeviationsSquared = new double[inputsWithOutliers[0].length];
+        double[] upperBounds = new double[means.length];
+        double[] lowerBounds = new double[means.length];
         double[][] outliersEliminated = new double[inputsWithOutliers.length][inputsWithOutliers[0].length];
-        for (int j = 0; j < inputsWithOutliers.length; j++) {
-            for (int i = 0; i < inputsWithOutliers.length; i++) {
-                averages[j] += inputsWithOutliers[i][j];
+        for (int i = 0; i < inputsWithOutliers[0].length; i++) {
+            for (int j = 0; j < inputsWithOutliers.length; j++) {
+                totals[i] += inputsWithOutliers[j][i];
             }
+            System.out.println("totals " + i + ": " + totals[i]);
         }
+        for (int i = 0; i < inputsWithOutliers[0].length; i++) {
+            means[i] = totals[i] / inputsWithOutliers.length;
+            for (int j = 0; j < inputsWithOutliers.length; j++) {
+                totalDeviationsSquared[i] += Math.pow(inputsWithOutliers[j][i] - means[i], 2);
+                // top, sqr
+            }
+            standardDeviations[i] = Math.sqrt(totalDeviationsSquared[i] / inputsWithOutliers.length);
+            System.out.println("standard deviations " + i + ": " + standardDeviations[i]);
+        }
+        // establishing upper and lower bounds and weeding outliers out
+
         // the values in averages are the totals, now find averages by dividing each
         // value by the amount of inputs
-        for (int i = 0; i < averages.length; i++) {
-            averages[i] = averages[i] / inputsWithOutliers.length;
-        }
-
         return outliersEliminated;
     }
 
     public double[][] standardiseInputs(double[][] unstandardisedInputs) {
         double[][] inputsStandardised = new double[unstandardisedInputs.length][unstandardisedInputs[0].length];
-        //FIX
-        double[] mins = {1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
-        double[] maxes = {0, 0, 0, 0, 0, 0, 0, 0};
+        // FIX
+        double[] mins = { 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000 };
+        double[] maxes = { 0, 0, 0, 0, 0, 0, 0, 0 };
         // double min = unstandardisedInputs[0][0];
         // double max = unstandardisedInputs[0][0];
         // finding max and min values for each input
@@ -106,21 +119,22 @@ public class rearranging {
             }
         }
         for (int i = 0; i < mins.length; i++) {
-            System.out.println("min value" + i +": " + mins[i]);
-            System.out.println("max value" + i +": " + maxes[i]);
+            System.out.println("min value" + i + ": " + mins[i]);
+            System.out.println("max value" + i + ": " + maxes[i]);
         }
-            // standardising inputs
+        // standardising inputs
         for (int j = 0; j < inputsStandardised.length; j++) {
             for (int i = 0; i < maxes.length; i++) {
-                //FIX
-                inputsStandardised[i][j] = (0.8 * ((unstandardisedInputs[i][i] - mins[j] / maxes[j] - mins[j]))) + 0.1;
-                System.out.println("standardised value: " + inputsStandardised[i][j]);
+                // FIX
+                if (maxes[i] == mins[i]) {
+                    inputsStandardised[j][i] = 0.9;
+                } else {
+                    inputsStandardised[j][i] = (0.8 * (((unstandardisedInputs[j][i] - mins[i]) / (maxes[i] - mins[i]))))
+                            + 0.1;
+                }
+                System.out.println("standardised value: " + inputsStandardised[j][i]);
             }
         }
-        // for (double[] i : inputsStandardised) {
-        //     for (double j : i)
-        //         System.out.println(j);
-        // }        
         return inputsStandardised;
     }
 
@@ -128,7 +142,7 @@ public class rearranging {
         rearranging trial = new rearranging();
         List<List<String>> deleteddates = trial.deleteDates();
         double[][] cast = trial.castingToDouble(deleteddates);
-        trial.standardiseInputs(cast);
-        // System.out.println(standardised);
+        trial.eliminateOutliers(cast);
+        // trial.standardiseInputs(sd);
     }
 }
