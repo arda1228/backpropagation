@@ -77,6 +77,7 @@ public class rearranging {
         double[] totalDeviationsSquared = new double[inputsWithOutliers[0].length];
         double[] upperBounds = new double[means.length];
         double[] lowerBounds = new double[means.length];
+        boolean validRow;
         double[][] outliersEliminated = new double[inputsWithOutliers.length][inputsWithOutliers[0].length];
         for (int i = 0; i < inputsWithOutliers[0].length; i++) {
             for (int j = 0; j < inputsWithOutliers.length; j++) {
@@ -94,9 +95,28 @@ public class rearranging {
             System.out.println("standard deviations " + i + ": " + standardDeviations[i]);
         }
         // establishing upper and lower bounds and weeding outliers out
-
-        // the values in averages are the totals, now find averages by dividing each
-        // value by the amount of inputs
+        for (int i = 0; i < upperBounds.length; i++) {
+            upperBounds[i] = means[i] + (2 * standardDeviations[i]);
+            System.out.println("upper bound " + i + ": " + upperBounds[i]);
+            lowerBounds[i] = means[i] - (2 * standardDeviations[i]);            
+            System.out.println("lower bound " + i + ": " + lowerBounds[i]);
+        }
+        //eliminating outliers
+        for (int i = 0; i < inputsWithOutliers.length; i++) {
+            validRow = true;
+            for (int j = 0; j < inputsWithOutliers[0].length; j++) {
+                if (inputsWithOutliers[i][j] > upperBounds[j] || inputsWithOutliers[i][j] < lowerBounds[j]){
+                    validRow = false;
+                }
+            }
+            if (validRow) {
+                outliersEliminated[i] = inputsWithOutliers[i];
+            }
+        }
+        for (double[] i : outliersEliminated) {
+            for (double j : i)
+                System.out.println(j);
+        }
         return outliersEliminated;
     }
 
