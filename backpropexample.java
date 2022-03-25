@@ -5,26 +5,27 @@ class backpropexample {
     // standardising inputs
     // read from text file
     // make functions to do calculations
-    public double sigmoidActivation(double input) {//enter value, returns the sigmoid transfer for it
+    public double sigmoidActivation(double input) {// enter value, returns the sigmoid transfer for it
         return 1 / (1 + Math.exp(-input));
     }
 
-    public double sigmoidActivationDiff(double input) {//enter sigmoid-activated value, returns the differential
+    public double sigmoidActivationDiff(double input) {// enter sigmoid-activated value, returns the differential
         return input * (1 - input);
     }
 
-    public double tanhActivation(double input) {//enter value, returns the tanh transfer for it
+    public double tanhActivation(double input) {// enter value, returns the tanh transfer for it
         return (Math.exp(input) - Math.exp(-input)) / (Math.exp(input) + Math.exp(-input));
     }
 
-    public double tanhActivationDiff(double input) {//enter tanh-activated value, returns the differential
+    public double tanhActivationDiff(double input) {// enter tanh-activated value, returns the differential
         return 1 - (input * input);
     }
 
     // standardise functions
     // finding outliers (excel)
 
-    public double deltaHidden(double weight, double nextdelta, double value, boolean Sigmoid) {
+    public double deltaHidden(double weight, double nextdelta, double value, boolean Sigmoid) {// gives the delta value
+                                                                                               // of a given hidden node
         if (Sigmoid) {
             return weight * nextdelta * sigmoidActivationDiff(value);
         } else {
@@ -37,15 +38,17 @@ class backpropexample {
     public void backProp(double[] inputs, int NumberOfHiddenNodes, int epochs, boolean Sigmoid, boolean momentum) {
         // inputs = this.StandardiseInputs(inputs);
         Random rand = new Random(67); // instance of random class
-        int epochCounter = 0;
+        int epochCounter = 0;// updated each epoch
         double totalSquaredError = 0;
         double meanSquaredError;
-        double prevWeight;
-        double p = 0.1;
-        double alpha = 0.9;
-        double desiredOutput = inputs[inputs.length-1];
+        double prevWeight; // for momentum
+        double p = 0.1;// learning paramter
+        double alpha = 0.9; // for momentum
+        double desiredOutput = inputs[inputs.length - 1]; // takes the last value as the output CHANGE?
         int NoOfInputs = inputs.length - 1;
-        double[][] inputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes];
+        double[][] inputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes]; // each array conatins the
+                                                                                       // weights from a given input
+                                                                                       // node
         double[][] changeInInputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes];
         for (int i = 0; i < NoOfInputs; i++) {
             for (int j = 0; j < NumberOfHiddenNodes; j++) {
@@ -100,13 +103,13 @@ class backpropexample {
                     outputsActivation[i] = this.tanhActivation(outputLayerWeightedSums[i]);
                 }
                 System.out.println("output: " + outputsActivation[i]);
-                totalSquaredError +=  Math.pow(desiredOutput - outputsActivation[i], 2);
-                //change to destandardised output
+                totalSquaredError += Math.pow(desiredOutput - outputsActivation[i], 2);
+                // change to destandardised output
             }
             // backwards pass
             for (int i = 0; i < outputsActivation.length; i++) {
                 deltaValueOutput[i] = (inputs[inputs.length - 1] - outputsActivation[i])
-                * (outputsActivation[i] * (1 - outputsActivation[i]));
+                        * (outputsActivation[i] * (1 - outputsActivation[i]));
                 prevWeight = outputBiases[i];
                 outputBiases[i] += p * deltaValueOutput[i];
                 changeInOutputBiases[i] = outputBiases[i] - prevWeight;
@@ -133,15 +136,15 @@ class backpropexample {
                 for (int j = 0; j < NumberOfHiddenNodes; j++) {
                     prevWeight = inputToHiddenWeights[i][j];
                     inputToHiddenWeights[i][j] += p * deltaValuesHidden[j] * inputs[i];
-                changeInInputToHiddenWeights[i][j] = inputToHiddenWeights[i][j] - prevWeight;
-                if (momentum) {
-                    inputToHiddenWeights[i][j] += (alpha * changeInInputToHiddenWeights[i][j]);
-                }
+                    changeInInputToHiddenWeights[i][j] = inputToHiddenWeights[i][j] - prevWeight;
+                    if (momentum) {
+                        inputToHiddenWeights[i][j] += (alpha * changeInInputToHiddenWeights[i][j]);
+                    }
                 }
             }
             epochCounter++;
         }
-        meanSquaredError = totalSquaredError/epochs;
+        meanSquaredError = totalSquaredError / epochs;
         System.out.println(meanSquaredError);
     }
 

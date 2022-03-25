@@ -1,19 +1,20 @@
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.io.FileNotFoundException;//catches error if no file found
+import java.util.ArrayList;//adaptable-length array
 import java.util.List;
 
 public class rearranging {
 
-    public List<List<String>> deleteDates() throws FileNotFoundException {
+    public List<List<String>> deleteDates() throws FileNotFoundException {// function to delete the dates at the
+                                                                          // beginning of every row of inputs
+        // argument is taken in form List<List<String>> as this is how it is read from
+        // the .csv file
         readingfromexternal test = new readingfromexternal();
-        List<List<String>> originals = test.getValues();
-        originals.remove(0);
-        // System.out.println("originals: " + originals);
+        List<List<String>> originals = test.getValues();// reads values from file into a list
+        originals.remove(0);// takes away the place names of each input
         for (List list : originals) {
-            list.remove(0);
+            list.remove(0);// removes first value
 
         }
-        // System.out.println("deleted dates: " + originals);
         return originals;
     }
 
@@ -23,35 +24,34 @@ public class rearranging {
         // non-numerical values
         List<String> tempI;// declare a variable to temporarily hold each list within inputs
         double tempDouble;// declare a variable to temporarily hold each value within a list in inputs
-        boolean rowValid;
-        boolean noNegatives;
+        boolean rowHasNoNegatives;// flag indicating if the row is free of non-numerical values
+        boolean noNegatives;// flag indicating the row has no negative values
         System.out.println(inputs.size());
         int initialSize = inputs.size();
         List<List<String>> inputsNumerical = new ArrayList<>();
         for (int i = 0; i < initialSize; i++) {// iterating through inputs
-            rowValid = true;
+            rowHasNoNegatives = true;
             tempI = inputs.get(i);
-            for (int j = 0; j < tempI.size(); j++) {// iterating through an individual list
+            for (int j = 0; j < tempI.size(); j++) {// iterating through an individual row of inputs
                 try {
                     tempDouble = Double.parseDouble(tempI.get(j));// attempts to cast numerical value to type double
                 } catch (Exception e) {// if value non-numerical
-                    rowValid = false;
+                    rowHasNoNegatives = false;
                 }
             }
             noNegatives = true;
-            if (rowValid) {
+            if (rowHasNoNegatives) {// no non-numerical values detected
                 for (int k = 0; k < tempI.size(); k++) {
-                    if (Double.parseDouble(tempI.get(k)) < 0) {
+                    if (Double.parseDouble(tempI.get(k)) < 0) {// checks if the value, when parsed to a double, is
+                                                               // negative
                         noNegatives = false;
                     }
                 }
-                if (noNegatives) {
-                    inputsNumerical.add(tempI);
+                if (noNegatives) {// no negatives detected
+                    inputsNumerical.add(tempI);// new 2d array of the numerical non-negative inputs
                 }
             }
         }
-        System.out.println(inputsNumerical.size());
-        System.out.println(inputsNumerical);
 
         double[][] inputsAsDoubles = new double[inputsNumerical.size()][inputsNumerical.get(0).size()];
         // allocates space in memory for the inputs, as a 2d array of type double
@@ -62,50 +62,56 @@ public class rearranging {
                 inputsAsDoubles[i][j] = tempDouble;// assigns to index
             }
         }
-        for (double[] i : inputsAsDoubles) {
-            for (double j : i)
-                System.out.println(j);
-        }
+        // for (double[] i : inputsAsDoubles) {
+        // for (double j : i)
+        // System.out.println(j);
+        // }
         return inputsAsDoubles;
     }
 
-    public double[][] eliminateOutliers(double[][] inputsWithOutliers) {
-        // finding outliers
-        double[] totals = new double[inputsWithOutliers[0].length];
-        double[] means = new double[inputsWithOutliers[0].length];
-        double[] standardDeviations = new double[inputsWithOutliers[0].length];
-        double[] totalDeviationsSquared = new double[inputsWithOutliers[0].length];
-        double[] upperBounds = new double[means.length];
-        double[] lowerBounds = new double[means.length];
-        boolean validRow;
+    public double[][] eliminateOutliers(double[][] inputsWithOutliers) {// finding and eliminating outliers
+        double[] totals = new double[inputsWithOutliers[0].length];// 1d array of the running totals for each predictor
+        double[] means = new double[inputsWithOutliers[0].length];// 1d array of the means for each predictor
+        double[] totalDeviationsSquared = new double[inputsWithOutliers[0].length];// 1d array of the total deviation
+                                                                                   // from the mean squared for each
+                                                                                   // predictor
+        double[] standardDeviations = new double[inputsWithOutliers[0].length];// 1d array of the standard deviations
+                                                                               // for each predictor
+        double[] upperBounds = new double[means.length];// 1d array of all the means for each predictor
+        double[] lowerBounds = new double[means.length];// 1d array of all the means for each predictor
+        boolean validRow;// flag that is true if the row of inputs contains no outliers (more than 2
+                         // standard deviations from the mean)
         double[][] outliersEliminated = new double[inputsWithOutliers.length][inputsWithOutliers[0].length];
+        //go through every value for each predictor and add it to its respective total
         for (int i = 0; i < inputsWithOutliers[0].length; i++) {
             for (int j = 0; j < inputsWithOutliers.length; j++) {
                 totals[i] += inputsWithOutliers[j][i];
             }
             System.out.println("totals " + i + ": " + totals[i]);
         }
+        //go through every value for each predictor and add it to its respective total squared deviation
         for (int i = 0; i < inputsWithOutliers[0].length; i++) {
+            //finding means 
             means[i] = totals[i] / inputsWithOutliers.length;
             for (int j = 0; j < inputsWithOutliers.length; j++) {
-                totalDeviationsSquared[i] += Math.pow(inputsWithOutliers[j][i] - means[i], 2);
-                // top, sqr
+                totalDeviationsSquared[i] += Math.pow(inputsWithOutliers[j][i] - means[i], 2);//total squared deviation
             }
-            standardDeviations[i] = Math.sqrt(totalDeviationsSquared[i] / inputsWithOutliers.length);
+            standardDeviations[i] = Math.sqrt(totalDeviationsSquared[i] / inputsWithOutliers.length);// final standard deviations
             System.out.println("standard deviations " + i + ": " + standardDeviations[i]);
         }
         // establishing upper and lower bounds and weeding outliers out
         for (int i = 0; i < upperBounds.length; i++) {
-            upperBounds[i] = means[i] + (2 * standardDeviations[i]);
+            upperBounds[i] = means[i] + (2 * standardDeviations[i]);//2 SD from mean
             System.out.println("upper bound " + i + ": " + upperBounds[i]);
-            lowerBounds[i] = means[i] - (2 * standardDeviations[i]);            
+            lowerBounds[i] = means[i] - (2 * standardDeviations[i]);//2 SD from mean
             System.out.println("lower bound " + i + ": " + lowerBounds[i]);
         }
-        //eliminating outliers
+        // eliminating outliers
         for (int i = 0; i < inputsWithOutliers.length; i++) {
             validRow = true;
             for (int j = 0; j < inputsWithOutliers[0].length; j++) {
-                if (inputsWithOutliers[i][j] > upperBounds[j] || inputsWithOutliers[i][j] < lowerBounds[j]){
+                //checking if there are any outliers in each row
+                if (inputsWithOutliers[i][j] > upperBounds[j] || inputsWithOutliers[i][j] < lowerBounds[j]) {
                     validRow = false;
                 }
             }
@@ -120,8 +126,8 @@ public class rearranging {
         return outliersEliminated;
     }
 
-    public double[][] standardiseInputs(double[][] unstandardisedInputs) {
-        double[][] inputsStandardised = new double[unstandardisedInputs.length][unstandardisedInputs[0].length];
+    public double[][] standardiseInputs(double[][] unstandardisedInputs) {//standardising inputs in range [0.1,0.9]
+        double[][] inputsStandardised = new double[unstandardisedInputs.length][unstandardisedInputs[0].length];// for final return
         // FIX
         double[] mins = { 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000 };
         double[] maxes = { 0, 0, 0, 0, 0, 0, 0, 0 };
