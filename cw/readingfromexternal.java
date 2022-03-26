@@ -26,7 +26,7 @@ class readingfromexternal {
 
     public List<List<String>> getValues() throws FileNotFoundException {
         List<List<String>> records = new ArrayList<>();
-        try (Scanner scanner = new Scanner(new File("Ouse93-96test.csv"));) {
+        try (Scanner scanner = new Scanner(new File("arda.csv"));) {
             while (scanner.hasNextLine()) {
                 records.add(getRecordFromLine(scanner.nextLine()));
             }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+
 public class rearranging {
 
     public List<List<String>> deleteDates() throws FileNotFoundException {// function to delete the dates at the
@@ -246,15 +247,15 @@ public class rearranging {
         return outputRepositionedFromNextDayArray;
     }
 
-    class standardisedPackager {
+    class standardisedPackager {//contains all data needed to (de)standardise a value
         double[][] inputsStandardised;
         double[] mins;
         double[] maxes;
 
-        standardisedPackager(double[][] v1, double[] v2, double[] v3) {
-            inputsStandardised = v1;
-            mins = v2;
-            maxes = v3;
+        standardisedPackager(double[][] inputsStandardised, double[] mins, double[] maxes) {
+            this.inputsStandardised = inputsStandardised;
+            this.mins = mins;
+            this.maxes = maxes;
         }
     }
 
