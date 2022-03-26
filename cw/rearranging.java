@@ -303,16 +303,8 @@ public class rearranging {
         // trial.standardiseInputs(sd);
         // BASRI
         double[][] cleanedData = trial.eliminateOutliers(cast);
-        double[][] repositionedArray = trial.repositionOutputToEnd(cleanedData, 3); // targetColumn: skelton column
-                                                                                    // -after date removed
-        double[][] outputRepositionedFromNextDayArray = trial.getOneDayAheadOutputInTheRawAsOutput(repositionedArray); // next
-                                                                                                                       // days
-                                                                                                                       // output
-                                                                                                                       // is
-                                                                                                                       // taken
-                                                                                                                       // for
-                                                                                                                       // each
-                                                                                                                       // raw
+        double[][] repositionedArray = trial.repositionOutputToEnd(cleanedData, 3); // targetColumn: skelton column -after date removed
+        double[][] outputRepositionedFromNextDayArray = trial.getOneDayAheadOutputInTheRawAsOutput(repositionedArray); 
 
         double[][] shuffledArray = trial.shuffleArray(outputRepositionedFromNextDayArray);
         standardisedPackager standardizedPack = trial.standardiseInputs(shuffledArray);
