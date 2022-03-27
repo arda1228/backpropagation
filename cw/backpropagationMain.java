@@ -4,7 +4,7 @@ import java.util.ArrayList;//adaptable-length array
 import java.util.Arrays;
 import java.util.List;
 
-class backpropagation {
+class backpropagationMain {
     // standardising inputs
     // read from text file
     // make functions to do calculations
@@ -175,8 +175,24 @@ class backpropagation {
                 NumberOfHiddenNodes);
     }
 
-    public double testing(double[][] testSet, trainingResults results, double[] mins, double[] maxes, boolean Sigmoid) {
-        rearranging tester = new rearranging();
+    class testingResults {
+        double meanError;
+        double[] destandardisedModelledOutputs;
+        double[] destandardisedObservedOutputs;
+
+        testingResults(double meanError, double[] destandardisedModelledOutputs,
+                double[] destandardisedObservedOutputs) {
+            this.meanError = meanError;
+            this.destandardisedModelledOutputs = destandardisedModelledOutputs;
+            this.destandardisedObservedOutputs = destandardisedObservedOutputs;
+        }
+    }
+
+    public testingResults testing(double[][] testSet, trainingResults results, double[] mins, double[] maxes,
+            boolean Sigmoid) {
+        dataPreprocessing tester = new dataPreprocessing();
+        double[] destandardisedObservedOutputs = new double[testSet.length];
+        double[] destandardisedModelledOutputs = new double[testSet.length];
         double totalSquaredError = 0;
         double meanSquaredError;
         // int NoOfInputs = inputs[0].length - 1;
@@ -209,22 +225,33 @@ class backpropagation {
                 } else {
                     outputsActivation = this.tanhActivation(outputLayerWeightedSums[i]);
                 }
-                System.out.println("modelled(standardised): " + outputsActivation);
-                System.out.println("modelled(destandardised): " + tester.destandardisedValue(outputsActivation, mins[7], maxes[7]));
+                // System.out.println("modelled(standardised): " + outputsActivation);
+                System.out.println("modelled(destandardised): "
+                        + tester.destandardisedValue(outputsActivation, mins[7], maxes[7]));
 
-                System.out.println("observed(standardised): " + testSet[k][testSet[k].length - 1]);
-                System.out.println("observed(destandardised): " + tester.destandardisedValue(testSet[k][testSet[k].length - 1], mins[7], maxes[7]));
-                totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
-                // change to destandardised output
-            }
+                destandardisedModelledOutputs[k] = tester.destandardisedValue(outputsActivation, mins[7], maxes[7]);
+
+                // System.out.println("observed(standardised): " + testSet[k][testSet[k].length - 1]);
+                System.out.println("observed(destandardised): "
+                        + tester.destandardisedValue(testSet[k][testSet[k].length - 1], mins[7], maxes[7]) + "\n");
+
+                destandardisedObservedOutputs[k] = tester.destandardisedValue(testSet[k][testSet[k].length - 1],
+                        mins[7], maxes[7]);
+
+                totalSquaredError += Math.pow(destandardisedObservedOutputs[k] - destandardisedModelledOutputs[k], 2);
+                System.out.println("total squared error: " + totalSquaredError + "\n");
+                    }
         }
+
         meanSquaredError = totalSquaredError / testSet.length;
+        double meanError =  Math.pow(meanSquaredError, 0.5);
         System.out.println("mean squared error: " + meanSquaredError);
-        return meanSquaredError;
+        System.out.println("mean error: " + meanError);
+        return new testingResults(meanError, destandardisedModelledOutputs, destandardisedObservedOutputs);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        rearranging dataPrep = new rearranging();
+        dataPreprocessing dataPrep = new dataPreprocessing();
         // deleteDates will instantiate class readingfromexternal within itself
         // in order to get the original data from a csv file I created containing the
         // raw values
@@ -245,18 +272,27 @@ class backpropagation {
         // affections
         double[][] shuffledArray = dataPrep.shuffleArray(outputRepositionedFromNextDayArray);
         // standardise all values, and return mins and maxes for destandardisation
-        rearranging.standardisedPackager standardizedPack = dataPrep.standardiseInputs(shuffledArray);
+        dataPreprocessing.standardisedPackager standardizedPack = dataPrep.standardiseInputs(shuffledArray);
         // split into 60/20/20 for training, validation, and testing (attributes of
         // splitData)
-        rearranging.dataSplitter splitData = dataPrep.splitData(standardizedPack.inputsStandardised, 0.6, 0.2, 0.2);
+        dataPreprocessing.dataSplitter splitData = dataPrep.splitData(standardizedPack.inputsStandardised, 0.6, 0.2, 0.2);
         // instantiate backpropagation object to begin training and testing
-        backpropagation test = new backpropagation();
+        backpropagationMain test = new backpropagationMain();
         // train the weights using 60% of the shuffled standardised values
         // parameters: training set, hidden nodes, epochs, using Sigmoid transfer
         // function, momentum
-        trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 5, 100, true, false);
+        trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 20, 200, true, false);
         // test the weights using the test set and find the mean squared error
-        test.testing(splitData.testSet, readyfortesting, standardizedPack.mins, standardizedPack.maxes, true);
-        // USE DESTANDARDISED VALUES TO CALCULATE ERROR
+        testingResults tested = test.testing(splitData.testSet, readyfortesting, standardizedPack.mins, standardizedPack.maxes, true);
+        // instantiate class readingfromexternal
+        fileOperations fileOps = new fileOperations();
+        // merge the modelled and observed values into an array as this is an easier format for excel graphs to be made from
+        String[] merged = fileOps.mergeTwoArraysAsIsAndReturnAsStringArray(tested.destandardisedObservedOutputs, tested.destandardisedModelledOutputs);
+        // use createUniqueIdentifier to automatically record a unique filename
+        String fileName = fileOps.createUniqueIdentifier() + ".csv";
+        // create a new csv file with the modelled and observed values, so they can be made into a graph in excel
+        fileOps.createFile(fileName);
+        // populate the file with the 2 arrays merged
+        fileOps.writeArrayToFileAsLines(merged, fileName);
     }
 }

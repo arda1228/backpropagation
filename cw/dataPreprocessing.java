@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Random;
 
 
-public class rearranging {
+public class dataPreprocessing {
 
     public List<List<String>> deleteDates(String filename) throws FileNotFoundException {// function to delete the dates at the
                                                                           // beginning of every row of inputs
         // argument is taken in form List<List<String>> as this is how it is read from
         // the .csv file
-        readingfromexternal test = new readingfromexternal();
+        fileOperations test = new fileOperations();
         List<List<String>> originals = test.getValues(filename);// reads values from file into a list
         originals.remove(0);// takes away the place names of each input
         for (List list : originals) {

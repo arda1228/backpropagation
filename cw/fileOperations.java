@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-class readingfromexternal {
+class fileOperations {
 
     private static List<String> getRecordFromLine(String line) {
         String COMMA_DELIMITER = ",";
@@ -48,11 +48,11 @@ class readingfromexternal {
         }
     }
 
-    public static void writeArrayToFileAsLines(double[] inputArray, String fileName) {
+    public static void writeArrayToFileAsLines(String[] inputArray, String fileName) {
         try {
-            FileWriter myWriter = new FileWriter(fileName);
+            FileWriter myWriter = new FileWriter("./reportfiles/" + fileName);
             for (int i = 0; i < inputArray.length; i++) {
-                myWriter.write(Double.toString(inputArray[i]));
+                myWriter.write((inputArray[i]));
                 if (i != inputArray.length - 1) {
                     myWriter.write("\n");
                 }
@@ -65,6 +65,22 @@ class readingfromexternal {
         }
     }
 
+    public String[] convertArrayToStringArray(double[] inputArray) {
+        String[] stringArray = new String[inputArray.length];
+        for (int i = 0; i < inputArray.length; i++) {
+            stringArray[i] = Double.toString(inputArray[i]);
+        }
+        return stringArray;
+    }
+
+    public String[] mergeTwoArraysAsIsAndReturnAsStringArray(double[] inputArray1, double[] inputArray2) {
+        String[] mergedArray = new String[inputArray1.length];
+        for (int i = 0; i < inputArray1.length; i++) {
+            mergedArray[i] = Double.toString(inputArray1[i]) + "," + Double.toString(inputArray2[i]);
+        }
+        return mergedArray;
+    }
+
     public String createUniqueIdentifier() {
         Date date = Calendar.getInstance().getTime();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
@@ -74,13 +90,5 @@ class readingfromexternal {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        // readingfromexternal test = new readingfromexternal();
-        // // System.out.println("records: " + test.getValues());
-        // String uniqueId = test.createUniqueIdentifier();
-        // test.createFile(uniqueId);
-        // String fileName = "./reportfiles/" + uniqueId;
-        // double[] inputArray = { 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5.00008, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1,
-        //         2, 3, 4, 5, 6, 7 };
-        // test.writeArrayToFileAsLines(inputArray, fileName);
     }
 }
