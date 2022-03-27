@@ -24,9 +24,9 @@ class readingfromexternal {
         return values;
     }
 
-    public List<List<String>> getValues() throws FileNotFoundException {
+    public List<List<String>> getValues(String filename) throws FileNotFoundException {
         List<List<String>> records = new ArrayList<>();
-        try (Scanner scanner = new Scanner(new File("arda.csv"));) {
+        try (Scanner scanner = new Scanner(new File(filename));) {
             while (scanner.hasNextLine()) {
                 records.add(getRecordFromLine(scanner.nextLine()));
             }
@@ -74,13 +74,13 @@ class readingfromexternal {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        readingfromexternal test = new readingfromexternal();
-        // System.out.println("records: " + test.getValues());
-        String uniqueId = test.createUniqueIdentifier();
-        test.createFile(uniqueId);
-        String fileName = "./reportfiles/" + uniqueId;
-        double[] inputArray = { 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5.00008, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1,
-                2, 3, 4, 5, 6, 7 };
-        test.writeArrayToFileAsLines(inputArray, fileName);
+        // readingfromexternal test = new readingfromexternal();
+        // // System.out.println("records: " + test.getValues());
+        // String uniqueId = test.createUniqueIdentifier();
+        // test.createFile(uniqueId);
+        // String fileName = "./reportfiles/" + uniqueId;
+        // double[] inputArray = { 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5.00008, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1, 2, 3, 4, 5, 6, 7, 1,
+        //         2, 3, 4, 5, 6, 7 };
+        // test.writeArrayToFileAsLines(inputArray, fileName);
     }
 }

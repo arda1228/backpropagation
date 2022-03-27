@@ -175,20 +175,20 @@ class backpropagation {
                 NumberOfHiddenNodes);
     }
 
-    public double testing(double[][] inputs, trainingResults results, boolean Sigmoid) {
+    public double testing(double[][] testSet, trainingResults results, boolean Sigmoid) {
         double totalSquaredError = 0;
         double meanSquaredError;
         // int NoOfInputs = inputs[0].length - 1;
         double[] hiddenLayerWeightedSums = new double[results.numberOfHiddenNodes];
         double[] hiddenLayerActivation = new double[results.numberOfHiddenNodes];
         double[] outputLayerWeightedSums = new double[1];
-        double[] outputsActivation = new double[1];
-        for (int k = 0; k < inputs.length; k++) {
+        double outputsActivation;
+        for (int k = 0; k < testSet.length; k++) {
             // forward pass
             for (int i = 0; i < hiddenLayerWeightedSums.length; i++) {
                 hiddenLayerWeightedSums[i] = 0;
-                for (int j = 0; j < inputs[0].length - 1; j++) {
-                    hiddenLayerWeightedSums[i] += inputs[k][j] * results.inputToHiddenWeights[j][i];
+                for (int j = 0; j < testSet[0].length - 1; j++) {
+                    hiddenLayerWeightedSums[i] += testSet[k][j] * results.inputToHiddenWeights[j][i];
                 }
                 hiddenLayerWeightedSums[i] += results.hiddenLayerBiases[i];
                 if (Sigmoid) {
@@ -204,39 +204,27 @@ class backpropagation {
                 }
                 outputLayerWeightedSums[i] += results.outputBiases[i];
                 if (Sigmoid) {
-                    outputsActivation[i] = this.sigmoidActivation(outputLayerWeightedSums[i]);
+                    outputsActivation = this.sigmoidActivation(outputLayerWeightedSums[i]);
                 } else {
-                    outputsActivation[i] = this.tanhActivation(outputLayerWeightedSums[i]);
+                    outputsActivation = this.tanhActivation(outputLayerWeightedSums[i]);
                 }
-                System.out.println("modelled: " + outputsActivation[i]);
-                totalSquaredError += Math.pow(inputs[k][inputs[k].length - 1] - outputsActivation[i], 2);
+                System.out.println("modelled: " + outputsActivation);
+                System.out.println("observed: " + testSet[k][testSet[k].length - 1]);
+                totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
                 // change to destandardised output
             }
         }
-        meanSquaredError = totalSquaredError / inputs.length;
-        // System.out.println("mean squared error: " + meanSquaredError);
+        meanSquaredError = totalSquaredError / testSet.length;
+        System.out.println("mean squared error: " + meanSquaredError);
         return meanSquaredError;
     }
 
-    // class standardisedPackager {//contains all data needed to (de)standardise a value
-    //     double[][] inputsStandardised;
-    //     double[] mins;
-    //     double[] maxes;
-
-    //     standardisedPackager(double[][] inputsStandardised, double[] mins, double[] maxes) {
-    //         this.inputsStandardised = inputsStandardised;
-    //         this.mins = mins;
-    //         this.maxes = maxes;
-    //     }
-    // }
-
     public static void main(String[] args) throws FileNotFoundException {
-        // instantiate readingfromexternal to get data
-        readingfromexternal externalData = new readingfromexternal();
-        // instantiate rearranging
         rearranging dataPrep = new rearranging();
+        // deleteDates will instantiate class readingfromexternal within itself
+        // in order to get the original data from a csv file I created containing the raw values
         // delete the dates at the beginning of each row
-        List<List<String>> deleteddates = dataPrep.deleteDates();
+        List<List<String>> deleteddates = dataPrep.deleteDates("arda.csv");
         // casts the values from List<List<String>> to double
         double[][] cast = dataPrep.castingToDouble(deleteddates);
         // eliminates outliers, non-numerical, and negative values
@@ -249,13 +237,17 @@ class backpropagation {
                 .getOneDayAheadOutputInTheRawAsOutput(repositionedArray);
         // shuffle all values so that they can be split properly, without seasonal affections
         double[][] shuffledArray = dataPrep.shuffleArray(outputRepositionedFromNextDayArray);
-        // 
-       // standardisedPackager standardizedPack = new standardisedPackager(shuffledArray, {9}, {8});
-        // standardisedPackager standardizedPack = standardiseInputs(shuffledArray);
-        // double[][] testinputs = { { 1, 9, 5, 7, 8, 0, 2, 1 } };
-        // backpropagation test = new backpropagation();
-        // trainingResults readyfortesting = test.backpropTraining(testinputs, 4, 1000,
-        // true, false);
-        // test.testing(testinputs, readyfortesting, true);
+        // standardise all values, and return mins and maxes for destandardisation
+        rearranging.standardisedPackager standardizedPack = dataPrep.standardiseInputs(shuffledArray);
+        // split into 60/20/20 for training, validation, and testing (attributes of splitData)
+        rearranging.dataSplitter splitData = dataPrep.splitData(standardizedPack.inputsStandardised, 0.6, 0.39, 0.01);
+        // instantiate backpropagation object to begin training and testing
+        backpropagation test = new backpropagation();
+        // train the weights using 60% of the shuffled standardised values
+        // parameters: training set, hidden nodes, epochs, using Sigmoid transfer function, momentum
+        trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 50, 100,
+        true, false);
+        // test the weights using the test set and find the mean squared error
+        test.testing(splitData.testSet, readyfortesting, true);
     }
 }

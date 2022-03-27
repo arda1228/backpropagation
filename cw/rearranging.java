@@ -8,12 +8,12 @@ import java.util.Random;
 
 public class rearranging {
 
-    public List<List<String>> deleteDates() throws FileNotFoundException {// function to delete the dates at the
+    public List<List<String>> deleteDates(String filename) throws FileNotFoundException {// function to delete the dates at the
                                                                           // beginning of every row of inputs
         // argument is taken in form List<List<String>> as this is how it is read from
         // the .csv file
         readingfromexternal test = new readingfromexternal();
-        List<List<String>> originals = test.getValues();// reads values from file into a list
+        List<List<String>> originals = test.getValues(filename);// reads values from file into a list
         originals.remove(0);// takes away the place names of each input
         for (List list : originals) {
             list.remove(0);// removes first value
@@ -290,45 +290,47 @@ public class rearranging {
             validationSet[validationIndex] = inputArray[trainingDataCount + validationIndex];
         }
         for (int testIndex = 0; testIndex < testDataCount; testIndex++) {
-            trainingSet[testIndex] = inputArray[trainingDataCount + validationDataCount + testIndex];
+            testSet[testIndex] = inputArray[trainingDataCount + validationDataCount + testIndex];
         }
-        // System.out.println("CHECK: " + (inputArray.length - trainingSet.length - devSet.length - testSet.length));
+        // for (double[] i : testSet) {
+        //     System.out.println(Arrays.toString(i));
+        // }       
         return new dataSplitter(trainingSet, validationSet, testSet);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        rearranging trial = new rearranging();
-        List<List<String>> deleteddates = trial.deleteDates();
-        double[][] cast = trial.castingToDouble(deleteddates);
-        // trial.eliminateOutliers(cast); //BASRI COMMENTED OUT
-        // trial.standardiseInputs(sd);
-        // BASRI
-        double[][] cleanedData = trial.eliminateOutliers(cast);
-        double[][] repositionedArray = trial.repositionOutputToEnd(cleanedData, 3); // targetColumn: skelton column -after date removed
-        double[][] outputRepositionedFromNextDayArray = trial.getOneDayAheadOutputInTheRawAsOutput(repositionedArray); 
+        // rearranging trial = new rearranging();
+        // List<List<String>> deleteddates = trial.deleteDates("arda.csv");
+        // double[][] cast = trial.castingToDouble(deleteddates);
+        // // trial.eliminateOutliers(cast); //BASRI COMMENTED OUT
+        // // trial.standardiseInputs(sd);
+        // // BASRI
+        // double[][] cleanedData = trial.eliminateOutliers(cast);
+        // double[][] repositionedArray = trial.repositionOutputToEnd(cleanedData, 3); // targetColumn: skelton column -after date removed
+        // double[][] outputRepositionedFromNextDayArray = trial.getOneDayAheadOutputInTheRawAsOutput(repositionedArray); 
 
-        double[][] shuffledArray = trial.shuffleArray(outputRepositionedFromNextDayArray);
-        standardisedPackager standardizedPack = trial.standardiseInputs(shuffledArray);
+        // double[][] shuffledArray = trial.shuffleArray(outputRepositionedFromNextDayArray);
+        // standardisedPackager standardizedPack = trial.standardiseInputs(shuffledArray);
 
-        System.out.println("min value 7:====> " + standardizedPack.mins[7]);
-        System.out.println("max value 7:====> " + standardizedPack.maxes[7]);
-        System.out.println("standardised value - row 0  output:====> " + standardizedPack.inputsStandardised[0][7]);
-        System.out.println("Destandardised Value of output of some random row output: " + trial.destandardisedValue(
-                standardizedPack.inputsStandardised[0][7], standardizedPack.mins[7], standardizedPack.maxes[7]));
-        System.out.println("Destandardised Value of 0th element of some random row output: "
-                + trial.destandardisedValue(standardizedPack.inputsStandardised[0][0], standardizedPack.mins[0],
-                        standardizedPack.maxes[0]));
-        System.out.println("Destandardised Value of 1st element of some random row output: "
-                + trial.destandardisedValue(standardizedPack.inputsStandardised[0][1], standardizedPack.mins[1],
-                        standardizedPack.maxes[1]));
+        // System.out.println("min value 7:====> " + standardizedPack.mins[7]);
+        // System.out.println("max value 7:====> " + standardizedPack.maxes[7]);
+        // System.out.println("standardised value - row 0  output:====> " + standardizedPack.inputsStandardised[0][7]);
+        // System.out.println("Destandardised Value of output of some random row output: " + trial.destandardisedValue(
+        //         standardizedPack.inputsStandardised[0][7], standardizedPack.mins[7], standardizedPack.maxes[7]));
+        // System.out.println("Destandardised Value of 0th element of some random row output: "
+        //         + trial.destandardisedValue(standardizedPack.inputsStandardised[0][0], standardizedPack.mins[0],
+        //                 standardizedPack.maxes[0]));
+        // System.out.println("Destandardised Value of 1st element of some random row output: "
+        //         + trial.destandardisedValue(standardizedPack.inputsStandardised[0][1], standardizedPack.mins[1],
+        //                 standardizedPack.maxes[1]));
                         
-        dataSplitter splittedData = trial.splitData(standardizedPack.inputsStandardised, 0.9, 0.01, 0.09);
-        System.out.println("=====Listing validationSet - START ");
-        for (double[] i : splittedData.validationSet) {
-            System.out.println(Arrays.toString(i));
-        }
-        System.out.println("Total Count - validationSet: "+splittedData.validationSet.length);
-        System.out.println("=====Listing validationSet - END ");
+        // dataSplitter splittedData = trial.splitData(standardizedPack.inputsStandardised, 0.9, 0.01, 0.09);
+        // System.out.println("=====Listing validationSet - START ");
+        // for (double[] i : splittedData.validationSet) {
+        //     System.out.println(Arrays.toString(i));
+        // }
+        // System.out.println("Total Count - validationSet: "+splittedData.validationSet.length);
+        // System.out.println("=====Listing validationSet - END ");
 
     }
 }
