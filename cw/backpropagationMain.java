@@ -8,7 +8,7 @@ class backpropagationMain {
     // standardising inputs
     // read from text file
     // make functions to do calculations
-    public double sigmoidActivation(double input) {// enter value, returns the sigmoid transfer for it
+    public double sigmoidActivation(double input) {// enter value, returns the sigmoid transfer 
         return 1 / (1 + Math.exp(-input));
     }
 
@@ -16,7 +16,7 @@ class backpropagationMain {
         return input * (1 - input);
     }
 
-    public double tanhActivation(double input) {// enter value, returns the tanh transfer for it
+    public double tanhActivation(double input) {// enter value, returns the tanh transfer 
         return (Math.exp(input) - Math.exp(-input)) / (Math.exp(input) + Math.exp(-input));
     }
 
@@ -188,8 +188,7 @@ class backpropagationMain {
         }
     }
 
-    public testingResults testing(double[][] testSet, trainingResults results, double[] mins, double[] maxes,
-            boolean Sigmoid) {
+    public testingResults testing(double[][] testSet, trainingResults results, double[] mins, double[] maxes, boolean Sigmoid) {
         dataPreprocessing tester = new dataPreprocessing();
         double[] destandardisedObservedOutputs = new double[testSet.length];
         double[] destandardisedModelledOutputs = new double[testSet.length];
@@ -243,11 +242,13 @@ class backpropagationMain {
                 // totalSquaredError += Math.pow(destandardisedObservedOutputs[k] -
                 // destandardisedModelledOutputs[k], 2);
                 totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
-                // System.out.println("total squared error: " + totalSquaredError + "\n");
+                System.out.println("total squared error at value "+ k + ": " + totalSquaredError + "\n");
             }
         }
 
         meanSquaredError = totalSquaredError / testSet.length;
+        // System.out.println("total squared error: " + totalSquaredError + "\n");
+
         // double meanError = Math.pow(meanSquaredError, 0.5);
         // System.out.println("mean squared error: " + meanSquaredError);
         // System.out.println("mean error: " + meanError);
@@ -289,34 +290,42 @@ class backpropagationMain {
 
         fileOperations fileOps = new fileOperations();
         int epochCounterStart = 5;
-        int epochCounterEnd = 1000;
-        int epochCounterStep = 25;
+        int epochCounterEnd = 3000;
+        int epochCounterStep = 1000;
         int arraySize = (int) Math.floor((epochCounterEnd - epochCounterStart) / epochCounterStep) + 1;
         double[] epochCountArrayForGraph = new double[arraySize];
         double[] mseArrayForGraph = new double[arraySize];
         String[] merged = new String[arraySize];
         int indexForGraph = 0;
         // use createUniqueIdentifier to automatically record a unique filename prefix
-        String fileName = fileOps.createUniqueIdentifier();
-        for (int epochCounter = epochCounterStart; epochCounter < epochCounterEnd; epochCounter += epochCounterStep) {
-            trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 20, epochCounter, true,
-                    false);
-            // test the weights using the test set and find the mean squared error
-            testingResults tested = test.testing(splitData.testSet, readyfortesting, standardizedPack.mins,
-                    standardizedPack.maxes, true);
-            System.out.println("epochCount" + epochCounter + "\nmse: " + tested.meanSquaredError);
-            epochCountArrayForGraph[indexForGraph] = Double.valueOf(epochCounter);
-            mseArrayForGraph[indexForGraph] = tested.meanSquaredError;
-            indexForGraph++;
+        String fileName;
+        boolean Sigmoid = true;
+        for (int i = 0; i < 2; i++) {
+            fileName = fileOps.createUniqueIdentifier();
+            Sigmoid = !Sigmoid;
+            for (int epochCounter = epochCounterStart; epochCounter < epochCounterEnd; epochCounter += epochCounterStep) {
+                trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 20, epochCounter, Sigmoid,
+                        false);
+                // test the weights using the test set and find the mean squared error
+                testingResults tested = test.testing(splitData.testSet, readyfortesting, standardizedPack.mins,
+                        standardizedPack.maxes, true);
+                        // changed sigmoid in 311 from true
+                System.out.println("epochCount" + epochCounter + "\nmse: " + tested.meanSquaredError);
+                epochCountArrayForGraph[indexForGraph] = Double.valueOf(epochCounter);
+                mseArrayForGraph[indexForGraph] = tested.meanSquaredError;
+                indexForGraph++;
+            }
+            indexForGraph = 0;
+            // merge the epochCounter and mse values into an array as this is an easier
+            merged = fileOps.mergeTwoArraysAsIsAndReturnAsStringArray(epochCountArrayForGraph, mseArrayForGraph);
+            // update filename so that file created will have key configuration data in its
+            // name
+            fileName += "epochStart" + Integer.toString(epochCounterStart) + "epochEnd" + Integer.toString(epochCounterEnd)
+                    + "epochStep" + Integer.toString(epochCounterStep) + "sigmoid" + Boolean.toString(Sigmoid).toUpperCase() + ".csv";
+            // create a new csv file with the modelled and observed values, so they can be
+            // made into a graph in excel
+            fileOps.createFile(fileName);
+            fileOps.writeArrayToFileAsLines(merged, fileName);
         }
-        // merge the epochCounter and mse values into an array as this is an easier
-        merged = fileOps.mergeTwoArraysAsIsAndReturnAsStringArray(epochCountArrayForGraph, mseArrayForGraph);
-        //update filename so that file created will have key configuration data in its name
-        fileName += "epochStart" + Integer.toString(epochCounterStart) + "epochEnd" 
-                + Integer.toString(epochCounterEnd) + "epochStep" + Integer.toString(epochCounterStep)+ ".csv";
-        // create a new csv file with the modelled and observed values, so they can be
-        // made into a graph in excel
-        fileOps.createFile(fileName);
-        fileOps.writeArrayToFileAsLines(merged, fileName);
     }
 }
