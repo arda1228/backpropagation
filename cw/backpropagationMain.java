@@ -176,13 +176,13 @@ class backpropagationMain {
     }
 
     class testingResults {
-        double meanError;
+        double meanSquaredError;
         double[] destandardisedModelledOutputs;
         double[] destandardisedObservedOutputs;
 
-        testingResults(double meanError, double[] destandardisedModelledOutputs,
+        testingResults(double meanSquaredError, double[] destandardisedModelledOutputs,
                 double[] destandardisedObservedOutputs) {
-            this.meanError = meanError;
+            this.meanSquaredError = meanSquaredError;
             this.destandardisedModelledOutputs = destandardisedModelledOutputs;
             this.destandardisedObservedOutputs = destandardisedObservedOutputs;
         }
@@ -238,16 +238,17 @@ class backpropagationMain {
                 destandardisedObservedOutputs[k] = tester.destandardisedValue(testSet[k][testSet[k].length - 1],
                         mins[7], maxes[7]);
 
-                totalSquaredError += Math.pow(destandardisedObservedOutputs[k] - destandardisedModelledOutputs[k], 2);
+                // totalSquaredError += Math.pow(destandardisedObservedOutputs[k] - destandardisedModelledOutputs[k], 2);
+                totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
                 System.out.println("total squared error: " + totalSquaredError + "\n");
                     }
         }
 
         meanSquaredError = totalSquaredError / testSet.length;
-        double meanError =  Math.pow(meanSquaredError, 0.5);
+        // double meanError =  Math.pow(meanSquaredError, 0.5);
         System.out.println("mean squared error: " + meanSquaredError);
-        System.out.println("mean error: " + meanError);
-        return new testingResults(meanError, destandardisedModelledOutputs, destandardisedObservedOutputs);
+        // System.out.println("mean error: " + meanError);
+        return new testingResults(meanSquaredError, destandardisedModelledOutputs, destandardisedObservedOutputs);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
