@@ -175,7 +175,8 @@ class backpropagation {
                 NumberOfHiddenNodes);
     }
 
-    public double testing(double[][] testSet, trainingResults results, boolean Sigmoid) {
+    public double testing(double[][] testSet, trainingResults results, double[] mins, double[] maxes, boolean Sigmoid) {
+        rearranging tester = new rearranging();
         double totalSquaredError = 0;
         double meanSquaredError;
         // int NoOfInputs = inputs[0].length - 1;
@@ -208,8 +209,11 @@ class backpropagation {
                 } else {
                     outputsActivation = this.tanhActivation(outputLayerWeightedSums[i]);
                 }
-                System.out.println("modelled: " + outputsActivation);
-                System.out.println("observed: " + testSet[k][testSet[k].length - 1]);
+                System.out.println("modelled(standardised): " + outputsActivation);
+                System.out.println("modelled(destandardised): " + tester.destandardisedValue(outputsActivation, mins[7], maxes[7]));
+
+                System.out.println("observed(standardised): " + testSet[k][testSet[k].length - 1]);
+                System.out.println("observed(destandardised): " + tester.destandardisedValue(testSet[k][testSet[k].length - 1], mins[7], maxes[7]));
                 totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
                 // change to destandardised output
             }
@@ -222,7 +226,8 @@ class backpropagation {
     public static void main(String[] args) throws FileNotFoundException {
         rearranging dataPrep = new rearranging();
         // deleteDates will instantiate class readingfromexternal within itself
-        // in order to get the original data from a csv file I created containing the raw values
+        // in order to get the original data from a csv file I created containing the
+        // raw values
         // delete the dates at the beginning of each row
         List<List<String>> deleteddates = dataPrep.deleteDates("arda.csv");
         // casts the values from List<List<String>> to double
@@ -231,23 +236,27 @@ class backpropagation {
         double[][] cleanedData = dataPrep.eliminateOutliers(cast);
         // make the output the last item in each row
         // this made it a lot easier to work with
-        double[][] repositionedArray = dataPrep.repositionOutputToEnd(cleanedData, 3); 
-        // data restructured such that the next day's flow at skelton is the observed answer for each row of data
+        double[][] repositionedArray = dataPrep.repositionOutputToEnd(cleanedData, 3);
+        // data restructured such that the next day's flow at skelton is the observed
+        // answer for each row of data
         double[][] outputRepositionedFromNextDayArray = dataPrep
                 .getOneDayAheadOutputInTheRawAsOutput(repositionedArray);
-        // shuffle all values so that they can be split properly, without seasonal affections
+        // shuffle all values so that they can be split properly, without seasonal
+        // affections
         double[][] shuffledArray = dataPrep.shuffleArray(outputRepositionedFromNextDayArray);
         // standardise all values, and return mins and maxes for destandardisation
         rearranging.standardisedPackager standardizedPack = dataPrep.standardiseInputs(shuffledArray);
-        // split into 60/20/20 for training, validation, and testing (attributes of splitData)
-        rearranging.dataSplitter splitData = dataPrep.splitData(standardizedPack.inputsStandardised, 0.6, 0.39, 0.01);
+        // split into 60/20/20 for training, validation, and testing (attributes of
+        // splitData)
+        rearranging.dataSplitter splitData = dataPrep.splitData(standardizedPack.inputsStandardised, 0.6, 0.2, 0.2);
         // instantiate backpropagation object to begin training and testing
         backpropagation test = new backpropagation();
         // train the weights using 60% of the shuffled standardised values
-        // parameters: training set, hidden nodes, epochs, using Sigmoid transfer function, momentum
-        trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 50, 100,
-        true, false);
+        // parameters: training set, hidden nodes, epochs, using Sigmoid transfer
+        // function, momentum
+        trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 5, 100, true, false);
         // test the weights using the test set and find the mean squared error
-        test.testing(splitData.testSet, readyfortesting, true);
+        test.testing(splitData.testSet, readyfortesting, standardizedPack.mins, standardizedPack.maxes, true);
+        // USE DESTANDARDISED VALUES TO CALCULATE ERROR
     }
 }
