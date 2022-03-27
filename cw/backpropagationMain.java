@@ -242,7 +242,7 @@ class backpropagationMain {
                 // totalSquaredError += Math.pow(destandardisedObservedOutputs[k] -
                 // destandardisedModelledOutputs[k], 2);
                 totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
-                System.out.println("total squared error at value "+ k + ": " + totalSquaredError + "\n");
+                // System.out.println("total squared error at value "+ k + ": " + totalSquaredError + "\n");
             }
         }
 
@@ -289,9 +289,9 @@ class backpropagationMain {
         // function, momentum
 
         fileOperations fileOps = new fileOperations();
-        int epochCounterStart = 5;
-        int epochCounterEnd = 3000;
-        int epochCounterStep = 1000;
+        int epochCounterStart = 1000;
+        int epochCounterEnd = 10000;
+        int epochCounterStep = 500;
         int arraySize = (int) Math.floor((epochCounterEnd - epochCounterStart) / epochCounterStep) + 1;
         double[] epochCountArrayForGraph = new double[arraySize];
         double[] mseArrayForGraph = new double[arraySize];
@@ -300,9 +300,9 @@ class backpropagationMain {
         // use createUniqueIdentifier to automatically record a unique filename prefix
         String fileName;
         boolean Sigmoid = true;
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++) {
             fileName = fileOps.createUniqueIdentifier();
-            Sigmoid = !Sigmoid;
+            // Sigmoid = !Sigmoid;
             for (int epochCounter = epochCounterStart; epochCounter < epochCounterEnd; epochCounter += epochCounterStep) {
                 trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 20, epochCounter, Sigmoid,
                         false);
