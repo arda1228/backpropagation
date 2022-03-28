@@ -1,13 +1,11 @@
-import java.io.FileNotFoundException;
-import java.util.Random;
-import java.util.ArrayList;//adaptable-length array
-import java.util.Arrays;
-import java.util.List;
+import java.io.FileNotFoundException;// throws error if file isn't found
+import java.util.Random; // allows selection of random numbers to find global minima in weight space 
+import java.util.ArrayList; //adaptable-length array
+import java.util.Arrays; // 
+import java.util.List; // data structure representing ordered sequence of objects
 
 class backpropagationMain {
-    // standardising inputs
-    // read from text file
-    // make functions to do calculations
+
     public double sigmoidActivation(double input) {// enter value, returns the sigmoid transfer
         return 1 / (1 + Math.exp(-input));
     }
@@ -24,11 +22,10 @@ class backpropagationMain {
         return 1 - (input * input);
     }
 
-    // standardise functions
-    // finding outliers (excel)
-
-    public double deltaHidden(double weight, double nextdelta, double value, boolean Sigmoid) {// gives the delta value
-                                                                                               // of a given hidden node
+    public double deltaHidden(double weight, double nextdelta, double value, boolean Sigmoid) {
+        // gives the delta value of a given hidden node
+        // needed for backwards passing to allow changing of weights
+        // gets a different differential based on the activation function
         if (Sigmoid) {
             return weight * nextdelta * sigmoidActivationDiff(value);
         } else {
@@ -37,15 +34,24 @@ class backpropagationMain {
         }
     }
 
-    class trainingResults {
-        double[][] inputToHiddenWeights;
-        double[] hiddenToOutputWeights;
-        double[] hiddenLayerBiases;
-        double[] outputBiases;
+    class trainingResults {// used as the return type for the training function
+        // weights from input nodes to hidden layer
+        double[][] inputToHiddenWeights; // [i][j], where i = input value and j = hidden layer node
+
+        // weights from hidden layer nodes to the output node
+        double[] hiddenToOutputWeights; // [i], where i = hidden node value
+
+        // biases on hidden layer
+        double[] hiddenLayerBiases;// [i], where i = index of the hidden node within the layer
+
+        // bias on output layer
+        double[] outputBiases; // [i], where i = index of the output node within the layer
+
+        // number of hidden nodes
         int numberOfHiddenNodes;
 
         trainingResults(double[][] inputToHiddenWeights, double[] hiddenToOutputWeights, double[] hiddenLayerBiases,
-                double[] outputBiases, int numberOfHiddenNodes) {
+                double[] outputBiases, int numberOfHiddenNodes) {// constructor
             this.inputToHiddenWeights = inputToHiddenWeights;
             this.hiddenToOutputWeights = hiddenToOutputWeights;
             this.hiddenLayerBiases = hiddenLayerBiases;
@@ -57,49 +63,55 @@ class backpropagationMain {
     // MAIN TRAINING FUNCTION
     public trainingResults backpropTraining(double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
             int epochs, boolean Sigmoid, boolean momentum, double Alpha) {
-        // inputs = this.StandardiseInputs(inputs);
         Random rand = new Random(67); // instance of random class
         int epochCounter = 0;// updated each epoch
         double p = learningParameter;// learning parameter
-        double prevWeight; // for momentum
+        double prevWeight; // for momentum 
         double alpha = Alpha; // for momentum
-        // double desiredOutput = inputs[0][inputs.length - 1]; // takes the last value
-        // as the output CHANGE?
-        int NoOfInputs = inputs[0].length - 1;
-        double[][] inputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes]; // each array contains the
-                                                                                       // weights from a given input
-                                                                                       // node
+        int NoOfInputs = inputs[0].length - 1;// records number of inputs
+
+        // each array contains the weights from a given input node
+        double[][] inputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes]; 
+
+        // each array contains the last change in weights from a given input node
         double[][] changeInInputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes];
-        for (int i = 0; i < NoOfInputs; i++) {
-            for (int j = 0; j < NumberOfHiddenNodes; j++) {
+
+        for (int i = 0; i < NoOfInputs; i++) {//iterating through inputs
+            for (int j = 0; j < NumberOfHiddenNodes; j++) {// randomly assigning initial weights 
                 inputToHiddenWeights[i][j] = rand.nextDouble();
             }
         }
 
+        // each index contains the weight from a given hidden layer node
         double[] hiddenToOutputWeights = new double[NumberOfHiddenNodes];
-        double[] changeInHiddenToOutputWeights = new double[NumberOfHiddenNodes];
-        for (int i = 0; i < NumberOfHiddenNodes; i++) {
+
+        double[] changeInHiddenToOutputWeights = new double[NumberOfHiddenNodes]; // initialising array
+        for (int i = 0; i < NumberOfHiddenNodes; i++) { // randomly assigning initial weights 
             hiddenToOutputWeights[i] = rand.nextDouble();
         }
 
-        double[] hiddenLayerBiases = new double[NumberOfHiddenNodes];
-        double[] changeInHiddenLayerBiases = new double[NumberOfHiddenNodes];
+        double[] hiddenLayerBiases = new double[NumberOfHiddenNodes];// initialising array
+        double[] changeInHiddenLayerBiases = new double[NumberOfHiddenNodes];// initialising array
+
         for (int i = 0; i < NumberOfHiddenNodes; i++) {
-            hiddenLayerBiases[i] = rand.nextDouble();
-        }
+            hiddenLayerBiases[i] = rand.nextDouble(); // randomly assigning initial weights 
+        } 
 
-        double[] outputBiases = { rand.nextDouble() };
-        double[] changeInOutputBiases = { 0 };
+        double[] outputBiases = { rand.nextDouble() }; // randomly assigning initial weights 
+        double[] changeInOutputBiases = { 0 }; // assigning initial weights 
 
-        double[] hiddenLayerWeightedSums = new double[NumberOfHiddenNodes];
+        // initialising array sizes by the amount of nodes in their respective layers
+        double[] hiddenLayerWeightedSums = new double[NumberOfHiddenNodes]; 
         double[] hiddenLayerActivation = new double[NumberOfHiddenNodes];
         double[] outputLayerWeightedSums = new double[1];
         double[] outputsActivation = new double[1];
         double[] deltaValuesHidden = new double[NumberOfHiddenNodes];
         double[] deltaValueOutput = new double[1];
+
+        // forward pass through all data by the inputted number of epochs
         while (epochCounter < epochs) {
+            // iterates through all rows from inputted data
             for (int k = 0; k < inputs.length; k++) {
-                // forward pass
                 for (int i = 0; i < hiddenLayerWeightedSums.length; i++) {
                     hiddenLayerWeightedSums[i] = 0;
                     for (int j = 0; j < inputs[0].length - 1; j++) {
@@ -280,8 +292,8 @@ class backpropagationMain {
         for (int i = 0; i < 1; i++) {
             fileName = fileOps.createUniqueIdentifier();
             for (int IndependentCounter = IndependentCounterStart; IndependentCounter <= IndependentCounterEnd; IndependentCounter += IndependentCounterStep) {
-            // (double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
-            // int epochs, boolean Sigmoid, boolean momentum, double Alpha)
+                // (double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
+                // int epochs, boolean Sigmoid, boolean momentum, double Alpha)
                 trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 0.1, 10,
                         IndependentCounter, true, false, 0.9);
                 // test the weights using the test set and find the mean squared error
@@ -296,7 +308,7 @@ class backpropagationMain {
             merged = fileOps.mergeTwoArraysAsIsAndReturnAsStringArray(IndependentCountArrayForGraph, mseArrayForGraph);
             // update filename so that file created will have key configuration data in its
             // name
-            fileName +=  ".csv";
+            fileName += ".csv";
             // create a new csv file with the modelled and observed values, so they can be
             // made into a graph in excel
             fileOps.createFile(fileName);
