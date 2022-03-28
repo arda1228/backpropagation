@@ -257,7 +257,7 @@ class backpropagationMain {
 
     public static void main(String[] args) throws FileNotFoundException {
         dataPreprocessing dataPrep = new dataPreprocessing();
-        // deleteDates will instantiate class readingfromexternal within itself
+        // deleteDates will instantiate class dataPreprocessing within itself
         // in order to get the original data from a csv file I created containing the
         // raw values
         // delete the dates at the beginning of each row
@@ -276,7 +276,7 @@ class backpropagationMain {
         // shuffle all values so that they can be split properly, without seasonal
         // affections
         double[][] shuffledArray = dataPrep.shuffleArray(outputRepositionedFromNextDayArray);
-        // standardise all values, and return mins and maxes for destandardisation
+        // standardise all values in range [0.1,0.9], and return mins and maxes for destandardisation
         dataPreprocessing.standardisedPackager standardizedPack = dataPrep.standardiseInputs(shuffledArray);
         // split into 60/20/20 for training, validation, and testing (attributes of
         // splitData)
