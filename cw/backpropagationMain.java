@@ -56,13 +56,13 @@ class backpropagationMain {
 
     // MAIN TRAINING FUNCTION
     public trainingResults backpropTraining(double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
-            int epochs, boolean Sigmoid, boolean momentum) {
+            int epochs, boolean Sigmoid, boolean momentum, double Alpha) {
         // inputs = this.StandardiseInputs(inputs);
         Random rand = new Random(67); // instance of random class
         int epochCounter = 0;// updated each epoch
         double p = learningParameter;// learning parameter
         double prevWeight; // for momentum
-        double alpha = 0.9; // for momentum
+        double alpha = Alpha; // for momentum
         // double desiredOutput = inputs[0][inputs.length - 1]; // takes the last value
         // as the output CHANGE?
         int NoOfInputs = inputs[0].length - 1;
@@ -266,9 +266,9 @@ class backpropagationMain {
         // function, momentum
 
         fileOperations fileOps = new fileOperations();
-        double IndependentCounterStart = 0.05;
-        double IndependentCounterEnd = 0.9;
-        double IndependentCounterStep = 0.05;
+        int IndependentCounterStart = 200;
+        int IndependentCounterEnd = 5000;
+        int IndependentCounterStep = 200;
         int arraySize = (int) Math.floor((IndependentCounterEnd - IndependentCounterStart) / IndependentCounterStep)
                 + 1;
         double[] IndependentCountArrayForGraph = new double[arraySize];
@@ -277,20 +277,17 @@ class backpropagationMain {
         int indexForGraph = 0;
         // use createUniqueIdentifier to automatically record a unique filename prefix
         String fileName;
-        boolean Sigmoid = true;
         for (int i = 0; i < 1; i++) {
             fileName = fileOps.createUniqueIdentifier();
-            // Sigmoid = !Sigmoid;
-            for (double IndependentCounter = IndependentCounterStart; IndependentCounter <= IndependentCounterEnd; IndependentCounter += IndependentCounterStep) {
+            for (int IndependentCounter = IndependentCounterStart; IndependentCounter <= IndependentCounterEnd; IndependentCounter += IndependentCounterStep) {
             // (double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
-            // int epochs, boolean Sigmoid, boolean momentum)
-                trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, IndependentCounter, 5,
-                        4000, Sigmoid, false);
+            // int epochs, boolean Sigmoid, boolean momentum, double Alpha)
+                trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 0.1, 10,
+                        IndependentCounter, true, false, 0.9);
                 // test the weights using the test set and find the mean squared error
                 testingResults tested = test.testing(splitData.testSet, readyfortesting, true);
-                // changed sigmoid in 311 from true
-                System.out.println("change count" + IndependentCounter + "\nmse: " + tested.meanSquaredError);
-                IndependentCountArrayForGraph[indexForGraph] = Double.valueOf(IndependentCounter);
+                System.out.println("mse at " + IndependentCounter + ":\n" + tested.meanSquaredError);
+                IndependentCountArrayForGraph[indexForGraph] = IndependentCounter;
                 mseArrayForGraph[indexForGraph] = tested.meanSquaredError;
                 indexForGraph++;
             }
