@@ -58,14 +58,14 @@ class backpropagationMain {
         return ((((raw - 0.1) / 0.8) * (Max - Min)) + Min);
     }
 
-    // MAIN FUNCTION
+    // MAIN TRAINING FUNCTION
     public trainingResults backpropTraining(double[][] inputs, int NumberOfHiddenNodes, int epochs, boolean Sigmoid,
             boolean momentum) {
         // inputs = this.StandardiseInputs(inputs);
         Random rand = new Random(67); // instance of random class
         int epochCounter = 0;// updated each epoch
-        double prevWeight; // for momentum
         double p = 0.1;// learning parameter
+        double prevWeight; // for momentum
         double alpha = 0.9; // for momentum
         // double desiredOutput = inputs[0][inputs.length - 1]; // takes the last value
         // as the output CHANGE?
