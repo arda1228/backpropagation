@@ -8,7 +8,7 @@ class backpropagationMain {
     // standardising inputs
     // read from text file
     // make functions to do calculations
-    public double sigmoidActivation(double input) {// enter value, returns the sigmoid transfer 
+    public double sigmoidActivation(double input) {// enter value, returns the sigmoid transfer
         return 1 / (1 + Math.exp(-input));
     }
 
@@ -16,7 +16,7 @@ class backpropagationMain {
         return input * (1 - input);
     }
 
-    public double tanhActivation(double input) {// enter value, returns the tanh transfer 
+    public double tanhActivation(double input) {// enter value, returns the tanh transfer
         return (Math.exp(input) - Math.exp(-input)) / (Math.exp(input) + Math.exp(-input));
     }
 
@@ -54,17 +54,13 @@ class backpropagationMain {
         }
     }
 
-    public double destandardisedValue(double raw, double Min, double Max) {
-        return ((((raw - 0.1) / 0.8) * (Max - Min)) + Min);
-    }
-
     // MAIN TRAINING FUNCTION
-    public trainingResults backpropTraining(double[][] inputs, int NumberOfHiddenNodes, int epochs, boolean Sigmoid,
-            boolean momentum) {
+    public trainingResults backpropTraining(double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
+            int epochs, boolean Sigmoid, boolean momentum) {
         // inputs = this.StandardiseInputs(inputs);
         Random rand = new Random(67); // instance of random class
         int epochCounter = 0;// updated each epoch
-        double p = 0.1;// learning parameter
+        double p = learningParameter;// learning parameter
         double prevWeight; // for momentum
         double alpha = 0.9; // for momentum
         // double desiredOutput = inputs[0][inputs.length - 1]; // takes the last value
@@ -127,10 +123,6 @@ class backpropagationMain {
                     } else {
                         outputsActivation[i] = this.tanhActivation(outputLayerWeightedSums[i]);
                     }
-                    // System.out.println("output: " + outputsActivation[i]);
-                    // totalSquaredError += Math.pow(inputs[k][inputs[k].length - 1] -
-                    // outputsActivation[i], 2);
-                    // change to destandardised output
                 }
                 // backwards pass
                 for (int i = 0; i < outputsActivation.length; i++) {
@@ -188,7 +180,7 @@ class backpropagationMain {
         }
     }
 
-    public testingResults testing(double[][] testSet, trainingResults results, double[] mins, double[] maxes, boolean Sigmoid) {
+    public testingResults testing(double[][] testSet, trainingResults results, boolean Sigmoid) {
         dataPreprocessing tester = new dataPreprocessing();
         double[] destandardisedObservedOutputs = new double[testSet.length];
         double[] destandardisedModelledOutputs = new double[testSet.length];
@@ -224,25 +216,9 @@ class backpropagationMain {
                 } else {
                     outputsActivation = this.tanhActivation(outputLayerWeightedSums[i]);
                 }
-                // System.out.println("modelled(standardised): " + outputsActivation);
-                // System.out.println("modelled(destandardised): "
-                // + tester.destandardisedValue(outputsActivation, mins[7], maxes[7]));
-
-                destandardisedModelledOutputs[k] = tester.destandardisedValue(outputsActivation, mins[7], maxes[7]);
-
-                // System.out.println("observed(standardised): " + testSet[k][testSet[k].length
-                // - 1]);
-                // System.out.println("observed(destandardised): "
-                // + tester.destandardisedValue(testSet[k][testSet[k].length - 1], mins[7],
-                // maxes[7]) + "\n");
-
-                destandardisedObservedOutputs[k] = tester.destandardisedValue(testSet[k][testSet[k].length - 1],
-                        mins[7], maxes[7]);
-
-                // totalSquaredError += Math.pow(destandardisedObservedOutputs[k] -
-                // destandardisedModelledOutputs[k], 2);
                 totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
-                // System.out.println("total squared error at value "+ k + ": " + totalSquaredError + "\n");
+                // System.out.println("total squared error at value "+ k + ": " +
+                // totalSquaredError + "\n");
             }
         }
 
@@ -276,7 +252,8 @@ class backpropagationMain {
         // shuffle all values so that they can be split properly, without seasonal
         // affections
         double[][] shuffledArray = dataPrep.shuffleArray(outputRepositionedFromNextDayArray);
-        // standardise all values in range [0.1,0.9], and return mins and maxes for destandardisation
+        // standardise all values in range [0.1,0.9], and return mins and maxes for
+        // destandardisation
         dataPreprocessing.standardisedPackager standardizedPack = dataPrep.standardiseInputs(shuffledArray);
         // split into 60/20/20 for training, validation, and testing (attributes of
         // splitData)
@@ -289,11 +266,12 @@ class backpropagationMain {
         // function, momentum
 
         fileOperations fileOps = new fileOperations();
-        int epochCounterStart = 1000;
-        int epochCounterEnd = 10000;
-        int epochCounterStep = 500;
-        int arraySize = (int) Math.floor((epochCounterEnd - epochCounterStart) / epochCounterStep) + 1;
-        double[] epochCountArrayForGraph = new double[arraySize];
+        double IndependentCounterStart = 0.05;
+        double IndependentCounterEnd = 0.9;
+        double IndependentCounterStep = 0.05;
+        int arraySize = (int) Math.floor((IndependentCounterEnd - IndependentCounterStart) / IndependentCounterStep)
+                + 1;
+        double[] IndependentCountArrayForGraph = new double[arraySize];
         double[] mseArrayForGraph = new double[arraySize];
         String[] merged = new String[arraySize];
         int indexForGraph = 0;
@@ -303,25 +281,25 @@ class backpropagationMain {
         for (int i = 0; i < 1; i++) {
             fileName = fileOps.createUniqueIdentifier();
             // Sigmoid = !Sigmoid;
-            for (int epochCounter = epochCounterStart; epochCounter < epochCounterEnd; epochCounter += epochCounterStep) {
-                trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 20, epochCounter, Sigmoid,
-                        false);
+            for (double IndependentCounter = IndependentCounterStart; IndependentCounter <= IndependentCounterEnd; IndependentCounter += IndependentCounterStep) {
+            // (double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
+            // int epochs, boolean Sigmoid, boolean momentum)
+                trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, IndependentCounter, 5,
+                        4000, Sigmoid, false);
                 // test the weights using the test set and find the mean squared error
-                testingResults tested = test.testing(splitData.testSet, readyfortesting, standardizedPack.mins,
-                        standardizedPack.maxes, true);
-                        // changed sigmoid in 311 from true
-                System.out.println("epochCount" + epochCounter + "\nmse: " + tested.meanSquaredError);
-                epochCountArrayForGraph[indexForGraph] = Double.valueOf(epochCounter);
+                testingResults tested = test.testing(splitData.testSet, readyfortesting, true);
+                // changed sigmoid in 311 from true
+                System.out.println("change count" + IndependentCounter + "\nmse: " + tested.meanSquaredError);
+                IndependentCountArrayForGraph[indexForGraph] = Double.valueOf(IndependentCounter);
                 mseArrayForGraph[indexForGraph] = tested.meanSquaredError;
                 indexForGraph++;
             }
             indexForGraph = 0;
             // merge the epochCounter and mse values into an array as this is an easier
-            merged = fileOps.mergeTwoArraysAsIsAndReturnAsStringArray(epochCountArrayForGraph, mseArrayForGraph);
+            merged = fileOps.mergeTwoArraysAsIsAndReturnAsStringArray(IndependentCountArrayForGraph, mseArrayForGraph);
             // update filename so that file created will have key configuration data in its
             // name
-            fileName += "epochStart" + Integer.toString(epochCounterStart) + "epochEnd" + Integer.toString(epochCounterEnd)
-                    + "epochStep" + Integer.toString(epochCounterStep) + "sigmoid" + Boolean.toString(Sigmoid).toUpperCase() + ".csv";
+            fileName +=  ".csv";
             // create a new csv file with the modelled and observed values, so they can be
             // made into a graph in excel
             fileOps.createFile(fileName);
