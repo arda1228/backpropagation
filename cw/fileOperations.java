@@ -98,4 +98,17 @@ class fileOperations {
         return strDate;
     }
 
+    public String[] convert2dDoubleArrayToOneDimensionStringArray(double[][] inputArray) {//converts a 2d double array to one dimension string array
+        String[] stringArray = new String[inputArray.length];
+        for (int i = 0; i < inputArray.length; i++) {
+            stringArray[i]="";
+            for (int j = 0; j < inputArray[0].length; j++) {
+                stringArray[i] = stringArray[i] + Double.toString(inputArray[i][j]);
+                if (j != inputArray[0].length-1) {
+                    stringArray[i] = stringArray[i] + ",";
+                }
+            }
+        }
+        return stringArray;
+    }
 }
