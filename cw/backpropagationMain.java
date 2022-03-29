@@ -66,18 +66,18 @@ class backpropagationMain {
         Random rand = new Random(67); // instance of random class
         int epochCounter = 0;// updated each epoch
         double p = learningParameter;// learning parameter
-        double prevWeight; // for momentum 
+        double prevWeight; // for momentum
         double alpha = Alpha; // for momentum
         int NoOfInputs = inputs[0].length - 1;// records number of inputs
 
         // each array contains the weights from a given input node
-        double[][] inputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes]; 
+        double[][] inputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes];
 
         // each array contains the last change in weights from a given input node
         double[][] changeInInputToHiddenWeights = new double[NoOfInputs][NumberOfHiddenNodes];
 
-        for (int i = 0; i < NoOfInputs; i++) {//iterating through inputs
-            for (int j = 0; j < NumberOfHiddenNodes; j++) {// randomly assigning initial weights 
+        for (int i = 0; i < NoOfInputs; i++) {// iterating through inputs
+            for (int j = 0; j < NumberOfHiddenNodes; j++) {// randomly assigning initial weights
                 inputToHiddenWeights[i][j] = rand.nextDouble();
             }
         }
@@ -86,7 +86,7 @@ class backpropagationMain {
         double[] hiddenToOutputWeights = new double[NumberOfHiddenNodes];
 
         double[] changeInHiddenToOutputWeights = new double[NumberOfHiddenNodes]; // initialising array
-        for (int i = 0; i < NumberOfHiddenNodes; i++) { // randomly assigning initial weights 
+        for (int i = 0; i < NumberOfHiddenNodes; i++) { // randomly assigning initial weights
             hiddenToOutputWeights[i] = rand.nextDouble();
         }
 
@@ -94,14 +94,14 @@ class backpropagationMain {
         double[] changeInHiddenLayerBiases = new double[NumberOfHiddenNodes];// initialising array
 
         for (int i = 0; i < NumberOfHiddenNodes; i++) {
-            hiddenLayerBiases[i] = rand.nextDouble(); // randomly assigning initial weights 
-        } 
+            hiddenLayerBiases[i] = rand.nextDouble(); // randomly assigning initial weights
+        }
 
-        double[] outputBiases = { rand.nextDouble() }; // randomly assigning initial weights 
-        double[] changeInOutputBiases = { 0 }; // assigning initial weights 
+        double[] outputBiases = { rand.nextDouble() }; // randomly assigning initial weights
+        double[] changeInOutputBiases = { 0 }; // assigning initial weights
 
         // initialising array sizes by the amount of nodes in their respective layers
-        double[] hiddenLayerWeightedSums = new double[NumberOfHiddenNodes]; 
+        double[] hiddenLayerWeightedSums = new double[NumberOfHiddenNodes];
         double[] hiddenLayerActivation = new double[NumberOfHiddenNodes];
         double[] outputLayerWeightedSums = new double[1];
         double[] outputsActivation = new double[1];
@@ -112,48 +112,69 @@ class backpropagationMain {
         while (epochCounter < epochs) {
             // iterates through all rows from inputted data
             for (int k = 0; k < inputs.length; k++) {
+                // iterating through all hidden layer nodes and declaring their initial values
                 for (int i = 0; i < hiddenLayerWeightedSums.length; i++) {
                     hiddenLayerWeightedSums[i] = 0;
                     for (int j = 0; j < inputs[0].length - 1; j++) {
+                        // iterating through all input values and creating weighted sums for the hidden
+                        // layer nodes
                         hiddenLayerWeightedSums[i] += inputs[k][j] * inputToHiddenWeights[j][i];
                     }
+                    // adding biases to hidden layer weighted sums
                     hiddenLayerWeightedSums[i] += hiddenLayerBiases[i];
+                    // depending on the selection in the method's arguments, an activation function
+                    // is selected
                     if (Sigmoid) {
                         hiddenLayerActivation[i] = this.sigmoidActivation(hiddenLayerWeightedSums[i]);
                     } else {
                         hiddenLayerActivation[i] = this.tanhActivation(hiddenLayerWeightedSums[i]);
                     }
                 }
+                // finding the output's weighted sum
                 for (int i = 0; i < outputLayerWeightedSums.length; i++) {
                     outputLayerWeightedSums[i] = 0;
                     for (int j = 0; j < hiddenLayerWeightedSums.length; j++) {
+                        // adds the weights and values from the hidden layer
                         outputLayerWeightedSums[i] += hiddenLayerActivation[j] * hiddenToOutputWeights[j];
                     }
+                    // adding the bias
                     outputLayerWeightedSums[i] += outputBiases[i];
+                    // depending on the selection in the method's arguments, an activation function
+                    // is selected
+
                     if (Sigmoid) {
                         outputsActivation[i] = this.sigmoidActivation(outputLayerWeightedSums[i]);
                     } else {
                         outputsActivation[i] = this.tanhActivation(outputLayerWeightedSums[i]);
                     }
                 }
-                // backwards pass
+                // backwards pass, changing weights
+                // starting with output node
                 for (int i = 0; i < outputsActivation.length; i++) {
+                    // finding delta value of output node
                     deltaValueOutput[i] = (inputs[k][inputs[k].length - 1] - outputsActivation[i])
                             * (outputsActivation[i] * (1 - outputsActivation[i]));
                     prevWeight = outputBiases[i];
                     outputBiases[i] += p * deltaValueOutput[i];
                     changeInOutputBiases[i] = outputBiases[i] - prevWeight;
+                    // saving previous weight and change in weights for momentum if selected
                     if (momentum) {
                         outputBiases[i] += (alpha * changeInOutputBiases[i]);
                     }
-
                 }
+                // changing path weights from hidden nodes
                 for (int i = 0; i < hiddenLayerActivation.length; i++) {
+                    // calling function to find delta of a given hidden node, saving to array
                     deltaValuesHidden[i] = this.deltaHidden(hiddenToOutputWeights[i], deltaValueOutput[0],
                             hiddenLayerActivation[i], Sigmoid);
+
+                    // saving previous weight and change in weights for momentum if selected
                     prevWeight = hiddenToOutputWeights[i];
+
+                    // changing weights
                     hiddenToOutputWeights[i] += p * deltaValueOutput[0] * hiddenLayerActivation[i];
                     changeInHiddenToOutputWeights[i] = hiddenToOutputWeights[i] - prevWeight;
+
                     prevWeight = hiddenLayerBiases[i];
                     hiddenLayerBiases[i] += p * deltaValuesHidden[i];
                     changeInHiddenLayerBiases[i] = hiddenLayerBiases[i] - prevWeight;
@@ -162,9 +183,12 @@ class backpropagationMain {
                         hiddenLayerBiases[i] += (alpha * changeInHiddenLayerBiases[i]);
                     }
                 }
-                for (int i = 0; i < inputToHiddenWeights.length; i++) {
-                    for (int j = 0; j < NumberOfHiddenNodes; j++) {
+                // changing path weights from input nodes
+                for (int i = 0; i < inputToHiddenWeights.length; i++) {//iterate through inputs
+                    for (int j = 0; j < NumberOfHiddenNodes; j++) {//iterate through hidden nodes 
+                        // saving previous weight and change in weights for momentum if selected
                         prevWeight = inputToHiddenWeights[i][j];
+                        // change weight
                         inputToHiddenWeights[i][j] += p * deltaValuesHidden[j] * inputs[k][i];
                         changeInInputToHiddenWeights[i][j] = inputToHiddenWeights[i][j] - prevWeight;
                         if (momentum) {
@@ -173,12 +197,15 @@ class backpropagationMain {
                     }
                 }
             }
-            epochCounter++;
+            epochCounter++;//one pass through the data has been completed
         }
+        // final weights have been found, so a new trainingResults object is constructed using them
+        // ready for testing
         return new trainingResults(inputToHiddenWeights, hiddenToOutputWeights, hiddenLayerBiases, outputBiases,
                 NumberOfHiddenNodes);
     }
-
+    
+    // class that is returned from testing function, allows to use results for analysis
     class testingResults {
         double meanSquaredError;
         double[] destandardisedModelledOutputs;
@@ -192,19 +219,21 @@ class backpropagationMain {
         }
     }
 
+    // testing function
+    // takes test set and weights as inputs
     public testingResults testing(double[][] testSet, trainingResults results, boolean Sigmoid) {
         dataPreprocessing tester = new dataPreprocessing();
+        // declaring array lengths and variables
         double[] destandardisedObservedOutputs = new double[testSet.length];
         double[] destandardisedModelledOutputs = new double[testSet.length];
-        double totalSquaredError = 0;
+        double totalSquaredError = 0;// needed for mse later
         double meanSquaredError;
-        // int NoOfInputs = inputs[0].length - 1;
         double[] hiddenLayerWeightedSums = new double[results.numberOfHiddenNodes];
         double[] hiddenLayerActivation = new double[results.numberOfHiddenNodes];
         double[] outputLayerWeightedSums = new double[1];
         double outputsActivation;
-        for (int k = 0; k < testSet.length; k++) {
-            // forward pass
+        for (int k = 0; k < testSet.length; k++) {//iterate through every row in test set
+            // forward pass only
             for (int i = 0; i < hiddenLayerWeightedSums.length; i++) {
                 hiddenLayerWeightedSums[i] = 0;
                 for (int j = 0; j < testSet[0].length - 1; j++) {
