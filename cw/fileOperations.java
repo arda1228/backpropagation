@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 class fileOperations {
 
     private static List<String> getRecordFromLine(String line) {
+        // used in getValues, gets values from the file line by line
         String COMMA_DELIMITER = ",";
         List<String> values = new ArrayList<String>();
         try (Scanner rowScanner = new Scanner(line)) {
@@ -25,6 +26,7 @@ class fileOperations {
     }
 
     public List<List<String>> getValues(String filename) throws FileNotFoundException {
+        // opens given file and reads values 
         List<List<String>> records = new ArrayList<>();
         try (Scanner scanner = new Scanner(new File(filename));) {
             while (scanner.hasNextLine()) {
@@ -35,6 +37,7 @@ class fileOperations {
     }
 
     public static void createFile(String fileName) {
+        // creates a file with the inputted filename
         try {
             File myObj = new File("./reportfiles/" + fileName);
             if (myObj.createNewFile()) {
@@ -49,6 +52,7 @@ class fileOperations {
     }
 
     public static void writeArrayToFileAsLines(String[] inputArray, String fileName) {
+        // writes given string array into the given file, line by line
         try {
             FileWriter myWriter = new FileWriter("./reportfiles/" + fileName);
             for (int i = 0; i < inputArray.length; i++) {
@@ -66,6 +70,8 @@ class fileOperations {
     }
 
     public String[] convertArrayToStringArray(double[] inputArray) {
+        // converts a double[] into a string[]
+        // to make for easier writing to file
         String[] stringArray = new String[inputArray.length];
         for (int i = 0; i < inputArray.length; i++) {
             stringArray[i] = Double.toString(inputArray[i]);
@@ -74,6 +80,8 @@ class fileOperations {
     }
 
     public String[] mergeTwoArraysAsIsAndReturnAsStringArray(double[] inputArray1, double[] inputArray2) {
+        // merges the 2 given double[], separating with commas
+        // used primarily to make graphs in excel e.g. hidden layers/mse
         String[] mergedArray = new String[inputArray1.length];
         for (int i = 0; i < inputArray1.length; i++) {
             mergedArray[i] = Double.toString(inputArray1[i]) + "," + Double.toString(inputArray2[i]);
@@ -82,6 +90,7 @@ class fileOperations {
     }
 
     public String createUniqueIdentifier() {
+        // creates unique identifier to be able to differentiate files apart based on date and time produced
         Date date = Calendar.getInstance().getTime();
         DateFormat dateFormat = new SimpleDateFormat("MMdd-hhmmss-");
         String strDate = dateFormat.format(date);
