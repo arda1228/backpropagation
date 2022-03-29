@@ -90,7 +90,6 @@ public class dataPreprocessing {
         for (int i = 0; i < inputsWithOutliers[0].length; i++) {
             // finding means
             means[i] = totals[i] / inputsWithOutliers.length;
-            // System.out.println("means " + i + ": " + means[i]);
             for (int j = 0; j < inputsWithOutliers.length; j++) {
                 totalDeviationsSquared[i] += Math.pow(inputsWithOutliers[j][i] - means[i], 2);// total squared deviation
             }
@@ -152,14 +151,9 @@ public class dataPreprocessing {
                 }
             }
         }
-        for (int i = 0; i < mins.length; i++) {
-            System.out.println("min value" + i + ": " + mins[i]);
-            System.out.println("max value" + i + ": " + maxes[i]);
-        }
         // standardising inputs
         for (int j = 0; j < inputsStandardised.length; j++) {
             for (int i = 0; i < maxes.length; i++) {
-                // FIX
                 if (maxes[i] == mins[i]) {
                     inputsStandardised[j][i] = 0.9;
                 } else {

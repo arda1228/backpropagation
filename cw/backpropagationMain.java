@@ -1,7 +1,5 @@
 import java.io.FileNotFoundException;// throws error if file isn't found
 import java.util.Random; // allows selection of random numbers to find global minima in weight space 
-import java.util.ArrayList; //adaptable-length array
-import java.util.Arrays; // 
 import java.util.List; // data structure representing ordered sequence of objects
 
 class backpropagationMain {
