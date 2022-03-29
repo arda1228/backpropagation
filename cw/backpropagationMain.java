@@ -221,7 +221,7 @@ class backpropagationMain {
 
     // testing function
     // takes test set and weights as inputs
-    public testingResults testing(double[][] testSet, trainingResults results, boolean Sigmoid) {
+    public testingResults testing(double[][] testSet, trainingResults results, double[] mins, double[] maxes, boolean Sigmoid) {
         dataPreprocessing tester = new dataPreprocessing();
         // declaring array lengths and variables
         double[] destandardisedObservedOutputs = new double[testSet.length];
@@ -257,6 +257,14 @@ class backpropagationMain {
                 } else {
                     outputsActivation = this.tanhActivation(outputLayerWeightedSums[i]);
                 }
+                System.out.println("modelled(standardised): " + outputsActivation);
+                System.out.println("modelled(destandardised): " + tester.destandardisedValue(outputsActivation, mins[7], maxes[7]));
+                destandardisedModelledOutputs[k] = tester.destandardisedValue(outputsActivation, mins[7], maxes[7]);
+
+                System.out.println("observed(standardised): " + testSet[k][testSet[k].length - 1]);
+                System.out.println("observed(destandardised): " + tester.destandardisedValue(testSet[k][testSet[k].length - 1], mins[7], maxes[7]));
+                destandardisedObservedOutputs[k] = tester.destandardisedValue(testSet[k][testSet[k].length - 1],
+                        mins[7], maxes[7]);
                 // incrementing total squared error between activated modelled and observed
                 // values
                 totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
@@ -303,17 +311,18 @@ class backpropagationMain {
         fileOperations fileOps = new fileOperations();
         // independent counter stands for the independent variable that will be changed
         // to form the x-axis of the graph, in the case where y is mean squared error
-        // for example, here it stands for the number of epochs
-        int IndependentCounterStart = 250;
-        int IndependentCounterEnd = 4000;
-        int IndependentCounterStep = 250;
+        // in this example, i did not use it as i had to find observed vs modelled values
+        // but it can be used to replace any continuous value in the arguments for backpropTraining (line 332)
+        int IndependentCounterStart = 0;
+        int IndependentCounterEnd = 0;
+        int IndependentCounterStep = 1;
         // declaring size of result arrays - must be the difference between start and end
         // divided by step size
         int arraySize = (int) Math.floor((IndependentCounterEnd - IndependentCounterStart) / IndependentCounterStep)
                 + 1;
-        double[] IndependentCountArrayForGraph = new double[arraySize];
-        double[] mseArrayForGraph = new double[arraySize];
-        String[] merged = new String[arraySize];
+        double[] IndependentCountArrayForGraph = new double[splitData.testSet.length];
+        double[] mseArrayForGraph = new double[splitData.testSet.length];
+        String[] merged = new String[splitData.testSet.length];
         int indexForGraph = 0;
         // use createUniqueIdentifier to automatically record a unique filename prefix
         String fileName;
@@ -321,15 +330,15 @@ class backpropagationMain {
         for (int IndependentCounter = IndependentCounterStart; IndependentCounter <= IndependentCounterEnd; IndependentCounter += IndependentCounterStep) {
             // train the weights using 60% of the shuffled standardised values
             trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 0.1, 11, 4000,
-                    true, false, 0.9);
+                    true, true, 0.05);
             // (double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
             // int epochs, boolean Sigmoid, boolean momentum, double Alpha)
 
             // test the weights using the test set and find the mean squared error
-            testingResults tested = test.testing(splitData.testSet, readyfortesting, true);
-            System.out.println("mse at " + IndependentCounter + ":\n" + tested.meanSquaredError);
-            IndependentCountArrayForGraph[indexForGraph] = IndependentCounter;
-            mseArrayForGraph[indexForGraph] = tested.meanSquaredError;
+            testingResults tested = test.testing(splitData.testSet, readyfortesting, standardizedPack.mins, standardizedPack.maxes, true);
+            System.out.println("modelled at " + IndependentCounter + ":\n" + tested.destandardisedModelledOutputs[23]);
+            IndependentCountArrayForGraph = tested.destandardisedObservedOutputs;
+            mseArrayForGraph = tested.destandardisedModelledOutputs;
             indexForGraph++;
         }
         indexForGraph = 0;
