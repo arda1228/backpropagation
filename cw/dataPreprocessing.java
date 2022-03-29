@@ -1,7 +1,5 @@
 import java.io.FileNotFoundException;//catches error if no file found
-// import java.lang.reflect.Array;
 import java.util.ArrayList;//adaptable-length array
-// import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 

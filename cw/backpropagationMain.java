@@ -304,9 +304,9 @@ class backpropagationMain {
         // independent counter stands for the independent variable that will be changed
         // to form the x-axis of the graph, in the case where y is mean squared error
         // for example, here it stands for the number of epochs
-        int IndependentCounterStart = 200;
-        int IndependentCounterEnd = 5000;
-        int IndependentCounterStep = 200;
+        int IndependentCounterStart = 1000;
+        int IndependentCounterEnd = 30000;
+        int IndependentCounterStep = 1000;
         // declaring size of result arrays - must be the difference between start and end
         // divided by step size
         int arraySize = (int) Math.floor((IndependentCounterEnd - IndependentCounterStart) / IndependentCounterStep)
@@ -320,7 +320,7 @@ class backpropagationMain {
         fileName = fileOps.createUniqueIdentifier();
         for (int IndependentCounter = IndependentCounterStart; IndependentCounter <= IndependentCounterEnd; IndependentCounter += IndependentCounterStep) {
             // train the weights using 60% of the shuffled standardised values
-            trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 0.1, 10, IndependentCounter,
+            trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 0.1, 12, IndependentCounter,
                     true, false, 0.9);
             // (double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
             // int epochs, boolean Sigmoid, boolean momentum, double Alpha)
