@@ -184,8 +184,8 @@ class backpropagationMain {
                     }
                 }
                 // changing path weights from input nodes
-                for (int i = 0; i < inputToHiddenWeights.length; i++) {//iterate through inputs
-                    for (int j = 0; j < NumberOfHiddenNodes; j++) {//iterate through hidden nodes 
+                for (int i = 0; i < inputToHiddenWeights.length; i++) {// iterate through inputs
+                    for (int j = 0; j < NumberOfHiddenNodes; j++) {// iterate through hidden nodes
                         // saving previous weight and change in weights for momentum if selected
                         prevWeight = inputToHiddenWeights[i][j];
                         // change weight
@@ -197,15 +197,17 @@ class backpropagationMain {
                     }
                 }
             }
-            epochCounter++;//one pass through the data has been completed
+            epochCounter++;// one pass through the data has been completed
         }
-        // final weights have been found, so a new trainingResults object is constructed using them
+        // final weights have been found, so a new trainingResults object is constructed
+        // using them
         // ready for testing
         return new trainingResults(inputToHiddenWeights, hiddenToOutputWeights, hiddenLayerBiases, outputBiases,
                 NumberOfHiddenNodes);
     }
-    
-    // class that is returned from testing function, allows to use results for analysis
+
+    // class that is returned from testing function, allows to use results for
+    // analysis
     class testingResults {
         double meanSquaredError;
         double[] destandardisedModelledOutputs;
@@ -232,8 +234,8 @@ class backpropagationMain {
         double[] hiddenLayerActivation = new double[results.numberOfHiddenNodes];
         double[] outputLayerWeightedSums = new double[1];
         double outputsActivation;
-        for (int k = 0; k < testSet.length; k++) {//iterate through every row in test set
-            // forward pass only
+        for (int k = 0; k < testSet.length; k++) {// iterate through every row in test set
+            // same as training but forward pass only
             for (int i = 0; i < hiddenLayerWeightedSums.length; i++) {
                 hiddenLayerWeightedSums[i] = 0;
                 for (int j = 0; j < testSet[0].length - 1; j++) {
@@ -257,18 +259,13 @@ class backpropagationMain {
                 } else {
                     outputsActivation = this.tanhActivation(outputLayerWeightedSums[i]);
                 }
+                // incrementing total squared error between activated modelled and observed
+                // values
                 totalSquaredError += Math.pow(testSet[k][testSet[k].length - 1] - outputsActivation, 2);
-                // System.out.println("total squared error at value "+ k + ": " +
-                // totalSquaredError + "\n");
             }
         }
 
-        meanSquaredError = totalSquaredError / testSet.length;
-        // System.out.println("total squared error: " + totalSquaredError + "\n");
-
-        // double meanError = Math.pow(meanSquaredError, 0.5);
-        // System.out.println("mean squared error: " + meanSquaredError);
-        // System.out.println("mean error: " + meanError);
+        meanSquaredError = totalSquaredError / testSet.length;// final mse calculation
         return new testingResults(meanSquaredError, destandardisedModelledOutputs, destandardisedObservedOutputs);
     }
 
@@ -302,14 +299,18 @@ class backpropagationMain {
                 0.2);
         // instantiate backpropagation object to begin training and testing
         backpropagationMain test = new backpropagationMain();
-        // train the weights using 60% of the shuffled standardised values
-        // parameters: training set, hidden nodes, epochs, using Sigmoid transfer
-        // function, momentum
 
+        // creating .csv files to make analysis graphs
+        // declare new fileOperations object to make new files with
         fileOperations fileOps = new fileOperations();
+        // independent counter stands for the independent variable that will be changed
+        // to form the x-axis of the graph, in the case where y is mean squared error
+        // for example, here it stands for the number of epochs
         int IndependentCounterStart = 200;
         int IndependentCounterEnd = 5000;
         int IndependentCounterStep = 200;
+        // declaring size of result arrays - must be the difference between start and end
+        // divided by step size
         int arraySize = (int) Math.floor((IndependentCounterEnd - IndependentCounterStart) / IndependentCounterStep)
                 + 1;
         double[] IndependentCountArrayForGraph = new double[arraySize];
@@ -318,30 +319,30 @@ class backpropagationMain {
         int indexForGraph = 0;
         // use createUniqueIdentifier to automatically record a unique filename prefix
         String fileName;
-        for (int i = 0; i < 1; i++) {
-            fileName = fileOps.createUniqueIdentifier();
-            for (int IndependentCounter = IndependentCounterStart; IndependentCounter <= IndependentCounterEnd; IndependentCounter += IndependentCounterStep) {
-                // (double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
-                // int epochs, boolean Sigmoid, boolean momentum, double Alpha)
-                trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 0.1, 10,
-                        IndependentCounter, true, false, 0.9);
-                // test the weights using the test set and find the mean squared error
-                testingResults tested = test.testing(splitData.testSet, readyfortesting, true);
-                System.out.println("mse at " + IndependentCounter + ":\n" + tested.meanSquaredError);
-                IndependentCountArrayForGraph[indexForGraph] = IndependentCounter;
-                mseArrayForGraph[indexForGraph] = tested.meanSquaredError;
-                indexForGraph++;
-            }
-            indexForGraph = 0;
-            // merge the epochCounter and mse values into an array as this is an easier
-            merged = fileOps.mergeTwoArraysAsIsAndReturnAsStringArray(IndependentCountArrayForGraph, mseArrayForGraph);
-            // update filename so that file created will have key configuration data in its
-            // name
-            fileName += ".csv";
-            // create a new csv file with the modelled and observed values, so they can be
-            // made into a graph in excel
-            fileOps.createFile(fileName);
-            fileOps.writeArrayToFileAsLines(merged, fileName);
+        fileName = fileOps.createUniqueIdentifier();
+        for (int IndependentCounter = IndependentCounterStart; IndependentCounter <= IndependentCounterEnd; IndependentCounter += IndependentCounterStep) {
+            // train the weights using 60% of the shuffled standardised values
+            trainingResults readyfortesting = test.backpropTraining(splitData.trainingSet, 0.1, 10, IndependentCounter,
+                    true, false, 0.9);
+            // (double[][] inputs, double learningParameter, int NumberOfHiddenNodes,
+            // int epochs, boolean Sigmoid, boolean momentum, double Alpha)
+
+            // test the weights using the test set and find the mean squared error
+            testingResults tested = test.testing(splitData.testSet, readyfortesting, true);
+            System.out.println("mse at " + IndependentCounter + ":\n" + tested.meanSquaredError);
+            IndependentCountArrayForGraph[indexForGraph] = IndependentCounter;
+            mseArrayForGraph[indexForGraph] = tested.meanSquaredError;
+            indexForGraph++;
         }
+        indexForGraph = 0;
+        // merge the epochCounter and mse values into an array as this is an easier
+        merged = fileOps.mergeTwoArraysAsIsAndReturnAsStringArray(IndependentCountArrayForGraph, mseArrayForGraph);
+        // update filename so that file created will have key configuration data in its
+        // name
+        fileName += ".csv";
+        // create a new csv file with the modelled and observed values, so they can be
+        // made into a graph in excel
+        fileOps.createFile(fileName);
+        fileOps.writeArrayToFileAsLines(merged, fileName);
     }
 }

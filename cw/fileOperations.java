@@ -89,6 +89,4 @@ class fileOperations {
         return strDate;
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-    }
 }

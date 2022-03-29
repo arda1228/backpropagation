@@ -1,53 +1,51 @@
 import java.io.FileNotFoundException;//catches error if no file found
 // import java.lang.reflect.Array;
 import java.util.ArrayList;//adaptable-length array
-import java.util.Arrays;
+// import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-
 public class dataPreprocessing {
 
-    public List<List<String>> deleteDates(String filename) throws FileNotFoundException {// function to delete the dates at the
-                                                                          // beginning of every row of inputs
-        // argument is taken in form List<List<String>> as this is how it is read from
+    public List<List<String>> deleteDates(String filename) throws FileNotFoundException {
+        // function to delete the dates at the beginning of every row of inputs
+        // return is given in form List<List<String>> as this is how it is read from
         // the .csv file
-        fileOperations test = new fileOperations();
-        List<List<String>> originals = test.getValues(filename);// reads values from file into a list
+        fileOperations reader = new fileOperations();
+        List<List<String>> originals = reader.getValues(filename);// reads values from file into a list
         originals.remove(0);// takes away the place names of each input
         for (List list : originals) {
-            list.remove(0);// removes first value
+            list.remove(0);// removes first value - the date
 
         }
         return originals;
     }
 
     public double[][] castingToDouble(List<List<String>> inputs) {
-        // make each list an array, cast the whole wider list or lists to an array, then
+        // make each list an array, cast the whole wider list of lists to an array, then
         // go through the arrays and convert all the values to doubles, weeding out
         // non-numerical values
         List<String> tempI;// declare a variable to temporarily hold each list within inputs
         double tempDouble;// declare a variable to temporarily hold each value within a list in inputs
-        boolean rowHasNoNegatives;// flag indicating if the row is free of non-numerical values
+        boolean rowHasOnlyNumbers;// flag indicating if the row is free of non-numerical values
         boolean noNegatives;// flag indicating the row has no negative values
-        System.out.println(inputs.size());
         int initialSize = inputs.size();
         List<List<String>> inputsNumerical = new ArrayList<>();
         for (int i = 0; i < initialSize; i++) {// iterating through inputs
-            rowHasNoNegatives = true;
+            rowHasOnlyNumbers = true;// assumes true until proven otherwise
             tempI = inputs.get(i);
             for (int j = 0; j < tempI.size(); j++) {// iterating through an individual row of inputs
                 try {
                     tempDouble = Double.parseDouble(tempI.get(j));// attempts to cast numerical value to type double
-                } catch (Exception e) {// if value non-numerical
-                    rowHasNoNegatives = false;
+                } catch (Exception e) {// if value non-numerical, row not used
+                    rowHasOnlyNumbers = false;
                 }
             }
             noNegatives = true;
-            if (rowHasNoNegatives) {// no non-numerical values detected
+            if (rowHasOnlyNumbers) {// no non-numerical values detected
                 for (int k = 0; k < tempI.size(); k++) {
-                    if (Double.parseDouble(tempI.get(k)) < 0) {// checks if the value, when parsed to a double, is
-                                                               // negative
+                    // checks if the value, when parsed to a double, is negative
+                    if (Double.parseDouble(tempI.get(k)) < 0) {
                         noNegatives = false;
                     }
                 }
@@ -66,10 +64,6 @@ public class dataPreprocessing {
                 inputsAsDoubles[i][j] = tempDouble;// assigns to index
             }
         }
-        // for (double[] i : inputsAsDoubles) {
-        // for (double j : i)
-        // System.out.println(j);
-        // }
         return inputsAsDoubles;
     }
 
@@ -90,7 +84,6 @@ public class dataPreprocessing {
             for (int j = 0; j < inputsWithOutliers.length; j++) {
                 totals[i] += inputsWithOutliers[j][i];
             }
-            // System.out.println("totals " + i + ": " + totals[i]);
         }
         // go through every value for each predictor and add it to its respective total
         // squared deviation
@@ -101,17 +94,14 @@ public class dataPreprocessing {
             for (int j = 0; j < inputsWithOutliers.length; j++) {
                 totalDeviationsSquared[i] += Math.pow(inputsWithOutliers[j][i] - means[i], 2);// total squared deviation
             }
-            standardDeviations[i] = Math.sqrt(totalDeviationsSquared[i] / inputsWithOutliers.length);// final standard
-                                                                                                     // deviations
-            // System.out.println("standard deviations " + i + ": " +
-            // standardDeviations[i]);
+            // final standard deviations
+            standardDeviations[i] = Math.sqrt(totalDeviationsSquared[i] / inputsWithOutliers.length);
+
         }
         // establishing upper and lower bounds and weeding outliers out
         for (int i = 0; i < upperBounds.length; i++) {
             upperBounds[i] = means[i] + (2 * standardDeviations[i]);// 2 SD from mean
-            // System.out.println("upper bound " + i + ": " + upperBounds[i]);
             lowerBounds[i] = means[i] - (2 * standardDeviations[i]);// 2 SD from mean
-            // System.out.println("lower bound " + i + ": " + lowerBounds[i]);
         }
         // eliminating outliers
         int numberOfValidRows = 0;
@@ -140,25 +130,17 @@ public class dataPreprocessing {
                 outliersEliminated2Index++;
             }
         }
-        // System.out.println("outliersEliminated2.length" + outliersEliminated.length);
-        // System.out.println("inputsWithOutliers.length" + inputsWithOutliers.length);
-        // for (double[] i : outliersEliminated) {
-        // System.out.println(Arrays.toString(i));
-        // }
         return outliersEliminated;
     }
 
-    public standardisedPackager standardiseInputs(double[][] unstandardisedInputs) {// standardising inputs in range
-                                                                                    // [0.1,0.9]
-        double[][] inputsStandardised = new double[unstandardisedInputs.length][unstandardisedInputs[0].length];// for
-                                                                                                                // final
-                                                                                                                // return
-        // FIX
+    public standardisedPackager standardiseInputs(double[][] unstandardisedInputs) {
+        // standardising inputs in range [0.1,0.9]
 
+        // for final return
+        double[][] inputsStandardised = new double[unstandardisedInputs.length][unstandardisedInputs[0].length];
+        // initial minimum and maximum values, to be changed
         double[] mins = { 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000 };
         double[] maxes = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        // double min = unstandardisedInputs[0][0];
-        // double max = unstandardisedInputs[0][0];
         // finding max and min values for each input
         for (int j = 0; j < unstandardisedInputs.length; j++) {
             for (int i = 0; i < unstandardisedInputs[0].length; i++) {
@@ -184,16 +166,13 @@ public class dataPreprocessing {
                     inputsStandardised[j][i] = (0.8 * (((unstandardisedInputs[j][i] - mins[i]) / (maxes[i] - mins[i]))))
                             + 0.1;
                 }
-                // System.out.println("standardised value: " + inputsStandardised[j][i]);
             }
         }
-        // for (double[] i : inputsStandardised) {
-        // System.out.println(Arrays.toString(i));
-        // }
         return new standardisedPackager(inputsStandardised, mins, maxes);
     }
 
     public double[][] shuffleArray(double[][] inputArray) {
+        // randomly shuffles the data so that seasonal affections do not occur
         Random rand = new Random(42);
         int randomIndextoSwap;
         double[] tempArray = new double[inputArray[0].length];
@@ -203,13 +182,12 @@ public class dataPreprocessing {
             inputArray[randomIndextoSwap] = inputArray[i];
             inputArray[i] = tempArray;
         }
-        // for (double[] i : inputArray) {
-        // System.out.println(Arrays.toString(i));
-        // }
         return inputArray;
     }
 
     public double[][] repositionOutputToEnd(double[][] inputArray, int targetColumn) {
+        // the skelton value is in the middle of each row
+        // much easier to deal with at the end 
         double[][] repositionedArray = new double[inputArray.length][inputArray[0].length];
         int runningIndex;
         for (int i = 0; i < inputArray.length; i++) {
@@ -222,32 +200,22 @@ public class dataPreprocessing {
             }
             repositionedArray[i][repositionedArray[0].length - 1] = inputArray[i][targetColumn];
         }
-        // System.out.println("===repositionedArray START===");
-        // for (double[] i : repositionedArray) {
-        // System.out.println(Arrays.toString(i));
-        // }
-        // System.out.println("===repositionedArray END===");
         return repositionedArray;
     }
 
     public double[][] getOneDayAheadOutputInTheRawAsOutput(double[][] inputArray) {
+        // changes the output value to that of the next day
+        // essentially lags all predictors by 1 day
         double[][] outputRepositionedFromNextDayArray = new double[inputArray.length - 1][inputArray[0].length];
         for (int i = 0; i < inputArray.length - 1; i++) {
             outputRepositionedFromNextDayArray[i] = inputArray[i];
             outputRepositionedFromNextDayArray[i][inputArray[0].length - 1] = inputArray[i + 1][inputArray[0].length
                     - 1];
         }
-        // System.out.println("===outputRepositionedFromNextDayArray START===");
-        // for (double[] i : outputRepositionedFromNextDayArray) {
-        // System.out.println(Arrays.toString(i));
-        // }
-        // System.out.println("inputArray.length: "+inputArray.length);
-        // System.out.println("outputRepositionedFromNextDayArray.length: "+outputRepositionedFromNextDayArray.length);
-        // System.out.println("===outputRepositionedFromNextDayArray END===");
         return outputRepositionedFromNextDayArray;
     }
 
-    class standardisedPackager {//contains all data needed to (de)standardise a value
+    class standardisedPackager {// contains all data needed to (de)standardise a value
         double[][] inputsStandardised;
         double[] mins;
         double[] maxes;
@@ -259,7 +227,7 @@ public class dataPreprocessing {
         }
     }
 
-    class dataSplitter {
+    class dataSplitter {//returned by splitData() method
         double[][] trainingSet;
         double[][] validationSet;
         double[][] testSet;
@@ -272,11 +240,14 @@ public class dataPreprocessing {
     }
 
     public double destandardisedValue(double Si, double Min, double Max) {
+        // destandardises a value to the raw using its minimum and maximum values
         return ((((Si - 0.1) / 0.8) * (Max - Min)) + Min);
     }
 
     public dataSplitter splitData(double[][] inputArray, double percentTrainingSet, double percentvalidationSet,
             double percentTestSet) {
+        // separates the data into training, validtion and testing sets
+        // arguments are taken as multipliers to find percentages, e.g. 0.6 = 60%
         int trainingDataCount = (int) Math.floor(inputArray.length * percentTrainingSet);
         int validationDataCount = (int) Math.floor(inputArray.length * percentvalidationSet);
         int testDataCount = (int) Math.floor(inputArray.length * percentTestSet);
@@ -292,45 +263,6 @@ public class dataPreprocessing {
         for (int testIndex = 0; testIndex < testDataCount; testIndex++) {
             testSet[testIndex] = inputArray[trainingDataCount + validationDataCount + testIndex];
         }
-        // for (double[] i : testSet) {
-        //     System.out.println(Arrays.toString(i));
-        // }       
         return new dataSplitter(trainingSet, validationSet, testSet);
-    }
-
-    public static void main(String[] args) throws FileNotFoundException {
-        // rearranging trial = new rearranging();
-        // List<List<String>> deleteddates = trial.deleteDates("arda.csv");
-        // double[][] cast = trial.castingToDouble(deleteddates);
-        // // trial.eliminateOutliers(cast); //BASRI COMMENTED OUT
-        // // trial.standardiseInputs(sd);
-        // // BASRI
-        // double[][] cleanedData = trial.eliminateOutliers(cast);
-        // double[][] repositionedArray = trial.repositionOutputToEnd(cleanedData, 3); // targetColumn: skelton column -after date removed
-        // double[][] outputRepositionedFromNextDayArray = trial.getOneDayAheadOutputInTheRawAsOutput(repositionedArray); 
-
-        // double[][] shuffledArray = trial.shuffleArray(outputRepositionedFromNextDayArray);
-        // standardisedPackager standardizedPack = trial.standardiseInputs(shuffledArray);
-
-        // System.out.println("min value 7:====> " + standardizedPack.mins[7]);
-        // System.out.println("max value 7:====> " + standardizedPack.maxes[7]);
-        // System.out.println("standardised value - row 0  output:====> " + standardizedPack.inputsStandardised[0][7]);
-        // System.out.println("Destandardised Value of output of some random row output: " + trial.destandardisedValue(
-        //         standardizedPack.inputsStandardised[0][7], standardizedPack.mins[7], standardizedPack.maxes[7]));
-        // System.out.println("Destandardised Value of 0th element of some random row output: "
-        //         + trial.destandardisedValue(standardizedPack.inputsStandardised[0][0], standardizedPack.mins[0],
-        //                 standardizedPack.maxes[0]));
-        // System.out.println("Destandardised Value of 1st element of some random row output: "
-        //         + trial.destandardisedValue(standardizedPack.inputsStandardised[0][1], standardizedPack.mins[1],
-        //                 standardizedPack.maxes[1]));
-                        
-        // dataSplitter splittedData = trial.splitData(standardizedPack.inputsStandardised, 0.9, 0.01, 0.09);
-        // System.out.println("=====Listing validationSet - START ");
-        // for (double[] i : splittedData.validationSet) {
-        //     System.out.println(Arrays.toString(i));
-        // }
-        // System.out.println("Total Count - validationSet: "+splittedData.validationSet.length);
-        // System.out.println("=====Listing validationSet - END ");
-
     }
 }
